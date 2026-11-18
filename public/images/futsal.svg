@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="pitchGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+    <radialGradient id="ballGlow" cx="0.5" cy="0.4" r="0.5">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="600" rx="40" fill="#0e1726"/>
+  <rect x="60" y="100" width="680" height="380" rx="30" fill="url(#pitchGradient)"/>
+  <path d="M120 260H680" stroke="#d1fae5" stroke-width="6" stroke-linecap="round" opacity="0.7"/>
+  <circle cx="400" cy="300" r="90" fill="none" stroke="#d1fae5" stroke-width="6" opacity="0.75"/>
+  <rect x="374" y="100" width="52" height="380" fill="rgba(255,255,255,0.16)"/>
+  <circle cx="400" cy="300" r="110" fill="url(#ballGlow)"/>
+  <g transform="translate(340 220)">
+    <circle cx="60" cy="60" r="60" fill="#f8fafc"/>
+    <path d="M60 0L74 29L105 35L80 58L87 88L60 75L33 88L40 58L15 35L46 29L60 0Z" fill="#0f172a" stroke="#0f172a" stroke-width="0"/>
+    <path d="M60 35L70 46L85 50L74 61L68 75L52 67L60 35Z" fill="#10b981"/>
+  </g>
+  <path d="M140 520C210 470 300 480 370 520C430 555 520 545 600 520" stroke="#f8fafc" stroke-width="10" stroke-linecap="round" opacity="0.25"/>
+  <circle cx="110" cy="180" r="24" fill="#ffffff" opacity="0.25"/>
+  <circle cx="685" cy="160" r="24" fill="#ffffff" opacity="0.2"/>
+  <text x="400" y="560" text-anchor="middle" fill="#e2f7ef" font-size="44" font-family="Inter, sans-serif" font-weight="700">Futsal Premium</text>
+</svg>

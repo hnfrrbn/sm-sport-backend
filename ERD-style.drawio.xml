@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-07-27T00:00:00.000Z" agent="5.0 (Windows)" version="20.1.0" type="device">
+  <diagram id="erdStyle" name="ERD Style">
+    <mxGraphModel dx="1050" dy="874" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="users" value="USERS\n-------------------\nPK id\nname\nemail\nphone\nrole\naddress\nstatus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="200" height="160" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="fields" value="FIELDS\n-------------------\nPK id\nname\ntype\ncapacity\nprice_per_hour\nstatus\ndescription" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="300" y="40" width="220" height="180" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="reservations" value="RESERVATIONS\n-------------------\nPK id\nFK user_id\nFK field_id\nreservation_date\nstart_time\nend_time\nduration_hours\ntotal_price\nstatus\nnotes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="260" width="260" height="240" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="transactions" value="TRANSACTIONS\n-------------------\nPK id\nFK user_id\nFK reservation_id\ntransaction_code\namount\npayment_method\nstatus\ndescription\npayment_date" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="360" y="320" width="260" height="220" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="payment_attempts" value="PAYMENT_ATTEMPTS\n-------------------\nPK id\nFK transaction_id\nprovider\nmethod\nstatus\ndeeplink\npayload\nattempt_token" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="320" width="260" height="180" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="activity_logs" value="ACTIVITY_LOGS\n-------------------\nPK id\nFK user_id\naction\nmodel_type\nmodel_id\ndescription\nold_values\nnew_values\nip_address\nuser_agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="40" width="260" height="240" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge_users_reservations" value="1..N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;strokeColor=#000000;fontSize=12;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="users" target="reservations">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge_fields_reservations" value="1..N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;strokeColor=#000000;fontSize=12;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="fields" target="reservations">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge_reservations_transactions" value="1..1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;strokeColor=#000000;fontSize=12;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="reservations" target="transactions">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge_users_transactions" value="1..N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;strokeColor=#000000;fontSize=12;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="users" target="transactions">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge_transactions_payment_attempts" value="1..N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;strokeColor=#000000;fontSize=12;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="transactions" target="payment_attempts">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge_users_activity_logs" value="1..N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;strokeColor=#000000;fontSize=12;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="users" target="activity_logs">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

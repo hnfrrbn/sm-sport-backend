@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="SM Sport Center logo">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="108" height="108" rx="24" fill="url(#g1)"/>
+  <rect x="22" y="22" width="76" height="76" rx="16" fill="white" fill-opacity="0.12"/>
+  <path d="M34 38h52v12H34zM34 56h24v12H34zM34 74h40v8H34z" fill="white"/>
+  <circle cx="84" cy="62" r="10" fill="#e0f2fe"/>
+</svg>

@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <rect width="1600" height="1000" fill="#f8fafc"/>
+  <text x="800" y="60" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700" fill="#0f172a">ERD SM SPORT BACKEND</text>
+  <text x="800" y="90" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="16" fill="#475569">Entity Relationship Diagram untuk sistem reservasi lapangan olahraga</text>
+
+  <rect x="110" y="150" width="220" height="260" rx="14" fill="#ffffff" stroke="#334155" stroke-width="2"/>
+  <text x="220" y="182" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">users</text>
+  <line x1="220" y1="195" x2="220" y2="215" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="130" y="235" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• id (PK)</text>
+  <text x="130" y="258" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• name</text>
+  <text x="130" y="281" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• email</text>
+  <text x="130" y="304" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• role</text>
+  <text x="130" y="327" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• status</text>
+  <text x="130" y="350" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• created_at</text>
+
+  <rect x="430" y="150" width="220" height="260" rx="14" fill="#ffffff" stroke="#334155" stroke-width="2"/>
+  <text x="540" y="182" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">fields</text>
+  <line x1="540" y1="195" x2="540" y2="215" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="450" y="235" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• id (PK)</text>
+  <text x="450" y="258" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• name</text>
+  <text x="450" y="281" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• type</text>
+  <text x="450" y="304" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• capacity</text>
+  <text x="450" y="327" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• price_per_hour</text>
+  <text x="450" y="350" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• status</text>
+
+  <rect x="750" y="150" width="260" height="300" rx="14" fill="#ffffff" stroke="#334155" stroke-width="2"/>
+  <text x="880" y="182" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">reservations</text>
+  <line x1="880" y1="195" x2="880" y2="215" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="770" y="235" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• id (PK)</text>
+  <text x="770" y="258" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• user_id (FK)</text>
+  <text x="770" y="281" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• field_id (FK)</text>
+  <text x="770" y="304" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• reservation_date</text>
+  <text x="770" y="327" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• start_time / end_time</text>
+  <text x="770" y="350" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• total_price</text>
+  <text x="770" y="373" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• status</text>
+
+  <rect x="1100" y="150" width="260" height="300" rx="14" fill="#ffffff" stroke="#334155" stroke-width="2"/>
+  <text x="1230" y="182" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">transactions</text>
+  <line x1="1230" y1="195" x2="1230" y2="215" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="1120" y="235" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• id (PK)</text>
+  <text x="1120" y="258" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• user_id (FK)</text>
+  <text x="1120" y="281" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• reservation_id (FK)</text>
+  <text x="1120" y="304" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• transaction_code</text>
+  <text x="1120" y="327" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• amount</text>
+  <text x="1120" y="350" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• payment_method</text>
+  <text x="1120" y="373" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• status</text>
+
+  <rect x="330" y="520" width="240" height="270" rx="14" fill="#ffffff" stroke="#334155" stroke-width="2"/>
+  <text x="450" y="552" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">payment_attempts</text>
+  <line x1="450" y1="565" x2="450" y2="585" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="350" y="610" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• id (PK)</text>
+  <text x="350" y="633" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• transaction_id (FK)</text>
+  <text x="350" y="656" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• provider</text>
+  <text x="350" y="679" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• method</text>
+  <text x="350" y="702" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• status</text>
+  <text x="350" y="725" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• deeplink</text>
+
+  <rect x="700" y="520" width="240" height="270" rx="14" fill="#ffffff" stroke="#334155" stroke-width="2"/>
+  <text x="820" y="552" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">activity_logs</text>
+  <line x1="820" y1="565" x2="820" y2="585" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="720" y="610" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• id (PK)</text>
+  <text x="720" y="633" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• user_id (FK)</text>
+  <text x="720" y="656" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• action</text>
+  <text x="720" y="679" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• model_type</text>
+  <text x="720" y="702" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• description</text>
+  <text x="720" y="725" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• ip_address</text>
+
+  <rect x="1070" y="520" width="220" height="230" rx="14" fill="#ffffff" stroke="#334155" stroke-width="2"/>
+  <text x="1180" y="552" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">sessions</text>
+  <line x1="1180" y1="565" x2="1180" y2="585" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="1090" y="610" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• id (PK)</text>
+  <text x="1090" y="633" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• user_id (FK)</text>
+  <text x="1090" y="656" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• ip_address</text>
+  <text x="1090" y="679" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• payload</text>
+  <text x="1090" y="702" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#334155">• last_activity</text>
+
+  <line x1="330" y1="280" x2="430" y2="280" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="650" y1="280" x2="750" y2="280" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1010" y1="280" x2="1100" y2="280" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1230" y1="450" x2="450" y2="520" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="820" y1="450" x2="820" y2="520" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="220" y1="410" x2="220" y2="520" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="220" y1="410" x2="1180" y2="520" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <text x="360" y="270" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#1d4ed8">1:N</text>
+  <text x="675" y="270" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#1d4ed8">1:N</text>
+  <text x="1035" y="270" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#1d4ed8">1:0..1</text>
+  <text x="820" y="490" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#1d4ed8">1:N</text>
+  <text x="610" y="500" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#1d4ed8">1:N</text>
+  <text x="180" y="480" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#1d4ed8">1:N</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#2563eb"/>
+    </marker>
+  </defs>
+</svg>
