@@ -3,26 +3,28 @@
 @section('title', 'Input Booking Manual (Walk-in)')
 
 @section('content')
-<div class="container-fluid">
+<div class="container py-3">
     <div class="row justify-content-center">
-        <div class="col-xl-9 col-lg-11">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="col-xl-10 col-lg-11">
+            <!-- Header Atas Minimalis -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 pb-2 border-bottom">
                 <div>
-                    <span class="badge bg-success bg-opacity-25 text-success px-3 py-1 rounded-pill fw-semibold">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill fw-semibold">
                         <i class="bi bi-person-walking me-1"></i> Pelanggan Datang Langsung (Walk-in)
                     </span>
-                    <h2 class="h3 fw-bold text-white mb-1 mt-2">Input Booking Manual Kasir</h2>
-                    <p class="text-white-50 mb-0">Catat pemesanan langsung dari kasir untuk pelanggan yang tidak memesan lewat aplikasi.</p>
+                    <h1 class="h3 fw-bold text-dark mb-1 mt-2">Input Booking Manual Kasir</h1>
+                    <p class="text-muted small mb-0">Catat pemesanan langsung dari kasir untuk pelanggan yang tidak memesan lewat aplikasi.</p>
                 </div>
-                <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-light btn-sm px-3 py-2">
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary px-3 py-2">
                     <i class="bi bi-arrow-left me-1"></i> Kembali ke Dashboard
                 </a>
             </div>
 
             <div class="row g-4">
+                <!-- Kolom Formulir Pemesanan -->
                 <div class="col-lg-7">
-                    <div class="card p-4 shadow-lg" style="background: #0f1d36; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px;">
-                        <h5 class="card-title text-white fw-bold mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                    <div class="card bg-white border shadow-sm p-4 rounded-3">
+                        <h5 class="card-title text-dark fw-bold mb-3 pb-2 border-bottom">
                             <i class="bi bi-pencil-square text-success me-2"></i> Formulir Pemesanan
                         </h5>
 
@@ -30,20 +32,20 @@
                             @csrf
 
                             <!-- Data Pelanggan Walk-in -->
-                            <div class="mb-4 p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
-                                <h6 class="text-info fw-bold small text-uppercase mb-3">
+                            <div class="mb-4 p-3 rounded-3 bg-light border">
+                                <h6 class="text-primary fw-bold small text-uppercase mb-3">
                                     <i class="bi bi-person-fill me-1"></i> Data Pelanggan
                                 </h6>
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label for="customer_name" class="form-label text-white small fw-semibold">Nama Pelanggan *</label>
+                                        <label for="customer_name" class="form-label text-dark small fw-semibold">Nama Pelanggan *</label>
                                         <input type="text" name="customer_name" id="customer_name" class="form-control @error('customer_name') is-invalid @enderror" placeholder="Contoh: Budi Santoso" value="{{ old('customer_name') }}" required>
                                         @error('customer_name')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="customer_phone" class="form-label text-white small fw-semibold">No. WhatsApp / HP *</label>
+                                        <label for="customer_phone" class="form-label text-dark small fw-semibold">No. WhatsApp / HP *</label>
                                         <input type="text" name="customer_phone" id="customer_phone" class="form-control @error('customer_phone') is-invalid @enderror" placeholder="Contoh: 08123456789" value="{{ old('customer_phone') }}" required>
                                         @error('customer_phone')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -53,17 +55,17 @@
                             </div>
 
                             <!-- Pilihan Lapangan & Waktu -->
-                            <div class="mb-4 p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
+                            <div class="mb-4 p-3 rounded-3 bg-light border">
                                 <h6 class="text-success fw-bold small text-uppercase mb-3">
                                     <i class="bi bi-calendar-event me-1"></i> Lapangan & Jadwal Main
                                 </h6>
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label for="field_id" class="form-label text-white small fw-semibold">Pilih Lapangan *</label>
+                                        <label for="field_id" class="form-label text-dark small fw-semibold">Pilih Lapangan *</label>
                                         <select name="field_id" id="field_id" class="form-select @error('field_id') is-invalid @enderror" required>
                                             <option value="">-- Pilih Lapangan --</option>
                                             @foreach($fields as $field)
-                                                <option value="{{ $field->id }}" data-price="{{ $field->price_per_hour }}" @if(old('field_id') == $field->id) selected @endif>
+                                                <option value="{{ $field->id }}" data-price="{{ $field->price_per_hour }}" @if(old('field_id', request('field_id')) == $field->id) selected @endif>
                                                     {{ $field->name }} ({{ ucfirst($field->type) }}) - Rp {{ number_format($field->price_per_hour, 0, ',', '.') }}/jam
                                                 </option>
                                             @endforeach
@@ -74,24 +76,24 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label for="reservation_date" class="form-label text-white small fw-semibold">Tanggal Main *</label>
-                                        <input type="date" name="reservation_date" id="reservation_date" class="form-control @error('reservation_date') is-invalid @enderror" value="{{ old('reservation_date', date('Y-m-d')) }}" min="{{ date('Y-m-d') }}" required>
+                                        <label for="reservation_date" class="form-label text-dark small fw-semibold">Tanggal Main *</label>
+                                        <input type="date" name="reservation_date" id="reservation_date" class="form-control @error('reservation_date') is-invalid @enderror" value="{{ old('reservation_date', request('reservation_date', request('date', date('Y-m-d')))) }}" min="{{ date('Y-m-d') }}" required>
                                         @error('reservation_date')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label for="start_time" class="form-label text-white small fw-semibold">Jam Mulai *</label>
-                                        <input type="time" name="start_time" id="start_time" class="form-control @error('start_time') is-invalid @enderror" value="{{ old('start_time', '09:00') }}" required>
+                                        <label for="start_time" class="form-label text-dark small fw-semibold">Jam Mulai *</label>
+                                        <input type="time" name="start_time" id="start_time" class="form-control @error('start_time') is-invalid @enderror" value="{{ old('start_time', request('start_time', '09:00')) }}" required>
                                         @error('start_time')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label for="end_time" class="form-label text-white small fw-semibold">Jam Selesai *</label>
-                                        <input type="time" name="end_time" id="end_time" class="form-control @error('end_time') is-invalid @enderror" value="{{ old('end_time', '10:00') }}" required>
+                                        <label for="end_time" class="form-label text-dark small fw-semibold">Jam Selesai *</label>
+                                        <input type="time" name="end_time" id="end_time" class="form-control @error('end_time') is-invalid @enderror" value="{{ old('end_time', request('end_time', '10:00')) }}" required>
                                         @error('end_time')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -100,13 +102,13 @@
                             </div>
 
                             <!-- Pembayaran Kasir -->
-                            <div class="mb-4 p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
-                                <h6 class="text-warning fw-bold small text-uppercase mb-3">
+                            <div class="mb-4 p-3 rounded-3 bg-light border">
+                                <h6 class="text-secondary fw-bold small text-uppercase mb-3">
                                     <i class="bi bi-wallet2 me-1"></i> Pembayaran Kasir
                                 </h6>
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label for="payment_method" class="form-label text-white small fw-semibold">Metode Bayar *</label>
+                                        <label for="payment_method" class="form-label text-dark small fw-semibold">Metode Bayar *</label>
                                         <select name="payment_method" id="payment_method" class="form-select" required>
                                             <option value="cash" selected>Tunai / Cash di Kasir</option>
                                             <option value="qris">QRIS Kasir</option>
@@ -115,7 +117,7 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label for="payment_status" class="form-label text-white small fw-semibold">Status Pembayaran *</label>
+                                        <label for="payment_status" class="form-label text-dark small fw-semibold">Status Pembayaran *</label>
                                         <select name="payment_status" id="payment_status" class="form-select" required>
                                             <option value="paid" selected>Lunas (Langsung Konfirmasi)</option>
                                             <option value="pending">Belum Lunas (Bayar Nanti)</option>
@@ -123,26 +125,26 @@
                                     </div>
 
                                     <div class="col-12">
-                                        <label for="notes" class="form-label text-white small fw-semibold">Catatan Kasir (Opsional)</label>
+                                        <label for="notes" class="form-label text-dark small fw-semibold">Catatan Kasir (Opsional)</label>
                                         <input type="text" name="notes" id="notes" class="form-control" placeholder="Contoh: Sewa rompi 1 set, DP 50%, dll.">
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Total Ringkasan Biaya -->
-                            <div class="p-3 rounded-3 mb-4 d-flex justify-content-between align-items-center" style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3);">
+                            <div class="p-3 rounded-3 mb-4 d-flex justify-content-between align-items-center bg-success-subtle border border-success-subtle">
                                 <div>
-                                    <small class="text-white-50 text-uppercase fw-semibold d-block">Total Tarif Sewa</small>
-                                    <span class="small text-white">Durasi: <strong id="durasiText">1</strong> Jam</span>
+                                    <small class="text-muted text-uppercase fw-semibold d-block">Total Tarif Sewa</small>
+                                    <span class="small text-dark">Durasi: <strong id="durasiText">1</strong> Jam</span>
                                 </div>
                                 <div class="text-end">
-                                    <span class="fs-3 fw-bold" id="totalHargaText" style="color: #4ade80;">Rp 0</span>
+                                    <span class="fs-3 fw-bold text-success" id="totalHargaText">Rp 0</span>
                                 </div>
                             </div>
 
                             <!-- Tombol Submit -->
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary btn-lg fw-bold py-3 shadow-lg" style="background: linear-gradient(135deg, #16a34a, #22c55e); border: none; border-radius: 14px;">
+                                <button type="submit" class="btn btn-primary btn-lg fw-bold py-2.5 shadow-sm">
                                     <i class="bi bi-check-circle-fill me-2"></i> Simpan Booking & Buka Tiket
                                 </button>
                                 <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
@@ -155,25 +157,25 @@
 
                 <!-- Kolom Jadwal Interaktif & Kunci Jam -->
                 <div class="col-lg-5">
-                    <div class="card p-4 h-100 shadow-lg" style="background: #0f1d36; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px;">
-                        <h5 class="card-title text-white fw-bold mb-2">
-                            <i class="bi bi-clock-history text-info me-2"></i> Ketersediaan Jam Lapangan
+                    <div class="card bg-white border shadow-sm p-4 h-100 rounded-3">
+                        <h5 class="card-title text-dark fw-bold mb-2">
+                            <i class="bi bi-clock-history text-success me-2"></i> Ketersediaan Jam Lapangan
                         </h5>
-                        <p class="text-white-50 small mb-3">
-                            Slot jam yang berwarna <span class="badge bg-danger">Merah (Terkunci)</span> sudah dipesan oleh pelanggan lain. Klik jam hijau untuk memilih langsung.
+                        <p class="text-muted small mb-3">
+                            Slot jam yang berwarna <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Merah (Terkunci)</span> sudah dipesan oleh pelanggan lain. Klik jam hijau untuk memilih langsung.
                         </p>
 
                         <div class="d-flex gap-2 mb-3">
-                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 px-2 py-1 small">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
                                 <i class="bi bi-check-circle"></i> Jam Kosong
                             </span>
-                            <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 px-2 py-1 small">
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 small">
                                 <i class="bi bi-lock-fill"></i> Sudah Dipesan
                             </span>
                         </div>
 
                         <div id="scheduleSlots" class="d-grid gap-2" style="max-height: 480px; overflow-y: auto;">
-                            <div class="text-white-50 small text-center py-4">Pilih lapangan dan tanggal untuk melihat slot jam.</div>
+                            <div class="text-muted small text-center py-4">Pilih lapangan dan tanggal untuk melihat slot jam.</div>
                         </div>
                     </div>
                 </div>
@@ -219,11 +221,11 @@
         const date = dateInput.value;
 
         if (!fieldId || !date) {
-            scheduleSlots.innerHTML = '<div class="text-white-50 small text-center py-4">Pilih lapangan dan tanggal untuk melihat slot jam.</div>';
+            scheduleSlots.innerHTML = '<div class="text-muted small text-center py-4">Pilih lapangan dan tanggal untuk melihat slot jam.</div>';
             return;
         }
 
-        scheduleSlots.innerHTML = '<div class="text-white-50 small text-center py-4"><span class="spinner-border spinner-border-sm me-2"></span>Memeriksa jadwal lapangan...</div>';
+        scheduleSlots.innerHTML = '<div class="text-muted small text-center py-4"><span class="spinner-border spinner-border-sm me-2 text-success"></span>Memeriksa jadwal lapangan...</div>';
 
         try {
             const res = await fetch(`/reservations/schedule?field_id=${fieldId}&date=${date}`);
@@ -232,7 +234,7 @@
             scheduleSlots.innerHTML = '';
 
             if (!data.slots || data.slots.length === 0) {
-                scheduleSlots.innerHTML = '<div class="text-white-50 small text-center py-4">Tidak ada slot jam tersedia.</div>';
+                scheduleSlots.innerHTML = '<div class="text-muted small text-center py-4">Tidak ada slot jam tersedia.</div>';
                 return;
             }
 
@@ -241,12 +243,12 @@
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = `btn btn-sm d-flex justify-content-between align-items-center py-2 px-3 rounded-3 text-start ${isBooked ? 'btn-outline-danger disabled' : 'btn-outline-success'}`;
-                btn.style.opacity = isBooked ? '0.5' : '1';
+                btn.style.opacity = isBooked ? '0.6' : '1';
                 btn.disabled = isBooked;
 
                 btn.innerHTML = `
                     <span><i class="bi ${isBooked ? 'bi-lock-fill text-danger' : 'bi-clock text-success'} me-2"></i><strong>${slot.start} - ${slot.end} WIB</strong></span>
-                    <span class="badge ${isBooked ? 'bg-danger' : 'bg-success'}">${isBooked ? 'Terkunci / Dipesan' : 'Tersedia'}</span>
+                    <span class="badge ${isBooked ? 'bg-danger-subtle text-danger border border-danger-subtle' : 'bg-success-subtle text-success border border-success-subtle'}">${isBooked ? 'Terkunci' : 'Tersedia'}</span>
                 `;
 
                 if (!isBooked) {

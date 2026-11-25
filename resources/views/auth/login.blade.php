@@ -3,79 +3,64 @@
 @section('title', 'Login')
 
 @section('content')
-<div class="container py-4">
-    <div class="row justify-content-center align-items-center min-vh-75">
-        <div class="col-xl-10">
-            <div class="row g-4 align-items-stretch">
-                <div class="col-lg-5">
-                    <div class="glass-card premium-auth-shell h-100 p-4 p-lg-5">
-                        <div class="hero-badge d-inline-flex mb-3">Selamat Datang</div>
-                        <h1 class="h2 fw-bolder mb-3 text-primary">
-                            <i class="bi bi-box-arrow-in-right"></i> Masuk ke akun Anda
-                        </h1>
-                        <p class="text-muted mb-4">Lanjutkan reservasi, cek pembayaran, dan lihat invoice dari satu dashboard yang nyaman.</p>
-                        <div class="d-grid gap-2 mb-4">
-                            <div class="feature-bullet">
-                                <i class="bi bi-check-circle-fill text-primary"></i>
-                                <span>Akses cepat ke riwayat reservasi</span>
-                            </div>
-                            <div class="feature-bullet">
-                                <i class="bi bi-check-circle-fill text-primary"></i>
-                                <span>Pantau status transaksi real-time</span>
-                            </div>
-                            <div class="feature-bullet">
-                                <i class="bi bi-check-circle-fill text-primary"></i>
-                                <span>Kelola pembayaran dengan lebih tenang</span>
-                            </div>
-                        </div>
-                        <div class="auth-highlight-card">
-                            <div class="small text-muted mb-1">Experience</div>
-                            <div class="fw-bold text-primary">Booking yang terasa premium, cepat, dan aman</div>
-                        </div>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success-subtle text-success p-3 mb-3">
+                        <i class="bi bi-person-circle fs-2"></i>
                     </div>
+                    <h1 class="h3 fw-bold text-dark mb-1">Masuk ke Akun</h1>
+                    <p class="text-muted small mb-0">Masuk untuk mengelola data reservasi atau akses panel admin.</p>
                 </div>
 
-                <div class="col-lg-7">
-                    <div class="glass-card p-4 p-lg-5 h-100">
-                        <div class="text-center mb-4">
-                            <h2 class="h3 fw-bolder mb-2">Login</h2>
-                            <p class="text-muted mb-0">Silakan masukkan email dan password Anda.</p>
-                        </div>
-
-                        <form action="{{ route('login') }}" method="POST">
-                            @csrf
-
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror"
-                                       value="{{ old('email') }}" required autofocus>
-                                @error('email')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror" required>
-                                @error('password')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" name="remember" id="remember" class="form-check-input">
-                                <label class="form-check-label" for="remember">Ingat saya</label>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary w-100 btn-lg">
-                                <i class="bi bi-check-circle"></i> Masuk
-                            </button>
-                        </form>
-
-                        <p class="text-center mt-4 mb-0">
-                            Belum punya akun? <a href="{{ route('register') }}" class="text-primary fw-bold">Daftar di sini</a>
-                        </p>
+                @if(session('error'))
+                    <div class="alert alert-danger py-2 small mb-3">
+                        {{ session('error') }}
                     </div>
+                @endif
+
+                <form action="{{ route('login') }}" method="POST">
+                    @csrf
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label small fw-bold text-dark">Alamat Email</label>
+                        <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror"
+                               value="{{ old('email') }}" placeholder="nama@email.com" required autofocus>
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label small fw-bold text-dark">Password</label>
+                        <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror"
+                               placeholder="••••••••" required>
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <div class="form-check">
+                            <input type="checkbox" name="remember" id="remember" class="form-check-input">
+                            <label class="form-check-label small text-muted" for="remember">Ingat saya</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2.5">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Masuk Sekarang
+                    </button>
+                </form>
+
+                <div class="mt-4 pt-3 border-top text-center">
+                    <p class="text-muted small mb-2">
+                        Pelanggan baru? Booking langsung tanpa login di <a href="{{ route('reservations.create') }}" class="text-success fw-bold">Pesan Lapangan</a>.
+                    </p>
+                    <p class="text-muted small mb-0">
+                        Belum punya akun? <a href="{{ route('register') }}" class="text-success fw-bold">Daftar di sini</a>
+                    </p>
                 </div>
             </div>
         </div>

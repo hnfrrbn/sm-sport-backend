@@ -3,785 +3,427 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SM Sport Center - Platform sewa lapangan futsal dan badminton dengan booking cepat, harga transparan, dan fasilitas terbaik.">
-    <meta name="theme-color" content="#081124">
+    <meta name="description" content="SM Sport Center - Booking Lapangan Futsal & Badminton Mudah, Cepat, dan Instan Tanpa Ribet.">
+    <meta name="theme-color" content="#059669">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/sm-sport-logo.svg') }}">
-    <title>@yield('title') - SM Sport Center</title>
-    
-    <!-- Bootstrap 5 CSS -->
+    <title>@yield('title', 'Booking Lapangan Futsal & Badminton') - SM Sport Center</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- AOS Animation -->
-    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <!-- SweetAlert2 -->
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-    @if (file_exists(public_path('build/manifest.json')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @else
-        <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=3">
-        <script src="{{ asset('js/app.js') }}" defer></script>
-    @endif
 
     <style>
-        /* Global Dark Theme & Contrast Reset */
         :root {
-            --bg-dark: #081124;
-            --surface-dark: #0f1d36;
-            --surface-card: #0f1d36;
-            --surface-inner: #0b172a;
-            --border-dark: rgba(255, 255, 255, 0.12);
-            --text-pure: #ffffff;
-            --text-bright: #f8fafc;
-            --text-muted: #cbd5e1;
-            --primary-accent: #22c55e;
-            --primary-gradient: linear-gradient(135deg, #16a34a, #22c55e);
+            --bg-page: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --text-heading: #0F172A;
+            --text-body: #334155;
+            --text-muted: #64748B;
+            --primary-emerald: #059669;
+            --primary-emerald-hover: #047857;
+            --primary-emerald-light: #ECFDF5;
+            --primary-emerald-border: #A7F3D0;
+            --border-subtle: #E2E8F0;
+            --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
         }
 
         body {
-            background: var(--bg-dark) !important;
-            color: var(--text-bright) !important;
-            font-size: 0.95rem !important;
-            line-height: 1.65 !important;
+            background-color: var(--bg-page) !important;
+            color: var(--text-body) !important;
+            font-family: var(--font-family) !important;
+            font-size: 0.935rem;
+            line-height: 1.6;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Navbar Styling */
-        .navbar {
-            background: rgba(8, 17, 36, 0.95) !important;
-            backdrop-filter: blur(14px) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
-            z-index: 1050 !important;
+        h1, h2, h3, h4, h5, h6,
+        .h1, .h2, .h3, .h4, .h5, .h6 {
+            color: var(--text-heading);
+            font-weight: 700;
+            letter-spacing: -0.015em;
+        }
+
+        a {
+            color: var(--primary-emerald);
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: var(--primary-emerald-hover);
+        }
+
+        /* Navbar: Bersih & Minimalis */
+        .site-navbar {
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border-subtle);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+            position: sticky;
+            top: 0;
+            z-index: 1030;
         }
 
         .navbar-brand {
-            letter-spacing: 0.02em;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 1.15rem;
+            color: var(--text-heading) !important;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            color: #ffffff !important;
+            gap: 0.65rem;
         }
 
-        .brand-mark {
-            width: 38px;
-            height: 38px;
+        .brand-badge {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-emerald-light);
+            border: 1px solid var(--primary-emerald-border);
+            border-radius: 9px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border-radius: 10px;
-            background: rgba(34, 197, 94, 0.2);
-            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: var(--primary-emerald);
+            font-size: 1.15rem;
         }
 
-        .brand-subtitle {
-            display: block;
-            font-size: 0.72rem;
-            color: #4ade80 !important;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .navbar .nav-link {
-            color: #f1f5f9 !important;
+        .site-navbar .nav-link {
+            color: var(--text-body) !important;
             font-weight: 500;
-            padding: 0.55rem 1rem !important;
-            border-radius: 10px;
+            font-size: 0.92rem;
+            padding: 0.5rem 0.85rem !important;
+            border-radius: 7px;
+            transition: all 0.15s ease;
+        }
+
+        .site-navbar .nav-link:hover {
+            color: var(--primary-emerald) !important;
+            background-color: var(--primary-emerald-light);
+        }
+
+        /* Buttons & Touch Targets */
+        .btn {
+            font-weight: 600;
+            border-radius: 8px;
+            touch-action: manipulation;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-emerald) !important;
+            border-color: var(--primary-emerald) !important;
+            color: #FFFFFF !important;
+        }
+
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: var(--primary-emerald-hover) !important;
+            border-color: var(--primary-emerald-hover) !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-emerald) !important;
+            border-color: var(--primary-emerald) !important;
+            background-color: transparent !important;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-emerald) !important;
+            color: #FFFFFF !important;
+        }
+
+        .btn-outline-secondary {
+            color: var(--text-body) !important;
+            border-color: #CBD5E1 !important;
+            background-color: #FFFFFF !important;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #F1F5F9 !important;
+            border-color: #94A3B8 !important;
+            color: var(--text-heading) !important;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             transition: all 0.2s ease;
         }
 
-        .navbar .nav-link:hover,
-        .navbar .nav-link:focus {
-            background: rgba(255, 255, 255, 0.08) !important;
-            color: #4ade80 !important;
-        }
-
-        .user-pill {
-            background: rgba(255, 255, 255, 0.08) !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            border-radius: 999px;
-            padding: 0.4rem 0.9rem !important;
-            color: #ffffff !important;
-        }
-
-        .user-avatar {
-            width: 26px;
-            height: 26px;
-            border-radius: 999px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: #22c55e;
-            color: #06170b;
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-
-        .dropdown-menu {
-            background: #0f1d36 !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            border-radius: 14px;
-            box-shadow: 0 16px 38px rgba(0, 0, 0, 0.5) !important;
-            padding: 0.6rem;
-        }
-
-        .dropdown-item {
-            color: #f1f5f9 !important;
+        /* Slot Jam Interaktif */
+        .slot-btn {
             border-radius: 8px;
-            padding: 0.55rem 1rem;
-            font-size: 0.92rem;
-        }
-
-        .dropdown-item:hover {
-            background: rgba(34, 197, 94, 0.15) !important;
-            color: #4ade80 !important;
-        }
-
-        /* Sidebar Styling */
-        .sidebar {
-            background: linear-gradient(180deg, #070e1c, #0b172a) !important;
-            min-height: 100vh !important;
-            position: fixed !important;
-            left: 0 !important;
-            top: 56px !important;
-            width: 280px !important;
-            overflow-y: auto !important;
-            color: #e2e8f0 !important;
-            padding: 24px 16px !important;
-            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45) !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-            z-index: 1000 !important;
-        }
-
-        .sidebar-title {
-            padding: 10px 14px !important;
-            font-size: 0.75rem !important;
-            font-weight: 700 !important;
-            text-transform: uppercase !important;
-            color: #94a3b8 !important;
-            letter-spacing: 0.12em !important;
-            margin-bottom: 0.5rem !important;
-        }
-
-        .sidebar-nav {
-            list-style: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            display: grid !important;
-            gap: 0.4rem !important;
-        }
-
-        .sidebar-nav a {
-            display: inline-grid !important;
-            grid-template-columns: auto 1fr !important;
-            gap: 0.85rem !important;
-            align-items: center !important;
-            color: #cbd5e1 !important;
-            text-decoration: none !important;
-            padding: 12px 16px !important;
-            border-left: 3px solid transparent !important;
-            border-radius: 12px !important;
-            background: rgba(255, 255, 255, 0.02) !important;
-            font-size: 0.95rem !important;
-            transition: all 0.2s ease !important;
-        }
-
-        .sidebar-nav a:hover {
-            background: rgba(255, 255, 255, 0.08) !important;
-            color: #ffffff !important;
-            border-left-color: #22c55e !important;
-            transform: translateX(3px) !important;
-        }
-
-        .sidebar-nav a.active {
-            background: linear-gradient(135deg, rgba(22, 163, 74, 0.22), rgba(15, 23, 42, 0.9)) !important;
-            color: #ffffff !important;
-            border-left-color: #22c55e !important;
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
-        }
-
-        /* Layout Margins */
-        main {
-            margin-top: 56px !important;
-            padding: 28px !important;
-            min-height: calc(100vh - 56px);
-        }
-
-        @auth
-            @media (min-width: 992px) {
-                main:not(.no-sidebar) {
-                    margin-left: 280px !important;
-                }
-                .has-sidebar-footer {
-                    margin-left: 280px !important;
-                }
-            }
-        @endauth
-
-        @guest
-            main,
-            .no-sidebar {
-                margin-left: 0 !important;
-            }
-        @endguest
-
-        /* All Cards & Containers Uniform Dark */
-        .card,
-        .content .card,
-        .glass-card,
-        .pricing-card,
-        .testimonial-card,
-        .contact-card,
-        .stat-card,
-        .glass-stat-card,
-        .table {
-            background: #0f1d36 !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            color: #ffffff !important;
-            border-radius: 18px !important;
-        }
-
-        .content .card .card-body,
-        .content .card .card-footer,
-        .content .card .card-header {
-            background: #0f1d36 !important;
-            color: #ffffff !important;
-            border-color: rgba(255, 255, 255, 0.08) !important;
-        }
-
-        .content .card .card-title,
-        .card-title,
-        h1, h2, h3, h4, h5, h6 {
-            color: #ffffff !important;
-            font-weight: 700 !important;
-        }
-
-        .card-text,
-        .content .card .card-text,
-        .card-text.text-muted,
-        .content .card .card-text.text-muted,
-        .text-muted {
-            color: #cbd5e1 !important;
-        }
-
-        /* Field Card Specific Styling */
-        .field-card {
-            background: #0f1d36 !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            border-radius: 20px !important;
-            overflow: hidden !important;
-            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
-            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35) !important;
-        }
-
-        .field-card:hover {
-            transform: translateY(-5px) !important;
-            box-shadow: 0 22px 48px rgba(0, 0, 0, 0.5) !important;
-            border-color: rgba(34, 197, 94, 0.45) !important;
-        }
-
-        .field-card-img {
-            height: 220px !important;
-            width: 100% !important;
-            object-fit: cover !important;
-            transition: transform 0.4s ease !important;
-        }
-
-        .field-card:hover .field-card-img {
-            transform: scale(1.03) !important;
-        }
-
-        /* FAQ Accordion Styling: Gelap Sempurna, Teks Putih Terang */
-        .accordion {
-            --bs-accordion-bg: #0f1d36 !important;
-            --bs-accordion-border-color: rgba(255, 255, 255, 0.12) !important;
-            --bs-accordion-btn-color: #ffffff !important;
-            --bs-accordion-btn-bg: #0f1d36 !important;
-            --bs-accordion-active-color: #ffffff !important;
-            --bs-accordion-active-bg: rgba(22, 163, 74, 0.20) !important;
-            --bs-accordion-btn-focus-box-shadow: none !important;
-        }
-
-        .accordion-item {
-            background: #0f1d36 !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            border-radius: 14px !important;
-            overflow: hidden !important;
-            margin-bottom: 0.85rem !important;
-        }
-
-        .accordion-button {
-            background: #0f1d36 !important;
-            color: #ffffff !important;
-            font-weight: 700 !important;
-            font-size: 1.05rem !important;
-            padding: 1.25rem 1.5rem !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-
-        .accordion-button:not(.collapsed) {
-            background: rgba(22, 163, 74, 0.22) !important;
-            color: #ffffff !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-        }
-
-        .accordion-button::after {
-            filter: brightness(0) invert(1) !important;
-        }
-
-        .accordion-body {
-            background: #0b172a !important;
-            color: #f1f5f9 !important;
-            font-size: 0.98rem !important;
-            line-height: 1.8 !important;
-            padding: 1.25rem 1.5rem !important;
-        }
-
-        /* Filter Lapangan Pill Buttons */
-        .field-filter-btn {
-            background: rgba(255, 255, 255, 0.06) !important;
-            color: #cbd5e1 !important;
-            border: 1px solid rgba(255, 255, 255, 0.14) !important;
-            font-weight: 600 !important;
-            font-size: 0.88rem !important;
-            transition: all 0.2s ease !important;
-        }
-
-        .field-filter-btn:hover {
-            background: rgba(255, 255, 255, 0.14) !important;
-            color: #ffffff !important;
-            border-color: rgba(34, 197, 94, 0.4) !important;
-        }
-
-        .field-filter-btn.active {
-            background: linear-gradient(135deg, #16a34a, #22c55e) !important;
-            color: #ffffff !important;
-            border-color: #22c55e !important;
-            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35) !important;
-        }
-
-        /* Buttons & Forms */
-        .btn-primary {
-            background: var(--primary-gradient) !important;
-            border: none !important;
-            color: #ffffff !important;
-            box-shadow: 0 10px 24px rgba(22, 163, 74, 0.35) !important;
+            padding: 8px 10px;
+            font-size: 0.825rem;
             font-weight: 600;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #15803d, #16a34a) !important;
-            transform: translateY(-1px);
-            box-shadow: 0 14px 28px rgba(22, 163, 74, 0.45) !important;
-        }
-
-        .form-control, .form-select, textarea {
-            background: #0b172a !important;
-            border: 1px solid rgba(255, 255, 255, 0.14) !important;
-            color: #ffffff !important;
-            border-radius: 12px !important;
-        }
-
-        .form-control:focus, .form-select:focus {
-            background: #0b172a !important;
-            border-color: #22c55e !important;
-            color: #ffffff !important;
-            box-shadow: 0 0 0 0.25rem rgba(34, 197, 94, 0.25) !important;
-        }
-
-        /* Footer Styling Tertata Rapi */
-        .luxury-footer {
-            background: #050b18 !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-            padding: 50px 0 25px 0 !important;
-            color: #e2e8f0 !important;
-            margin-top: 50px !important;
-        }
-
-        .footer-col-title {
-            color: #ffffff !important;
-            font-size: 1.05rem !important;
-            font-weight: 700 !important;
-            margin-bottom: 1.2rem !important;
-            letter-spacing: 0.02em !important;
-        }
-
-        .footer-links {
-            list-style: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-
-        .footer-links li {
-            margin-bottom: 0.65rem !important;
-        }
-
-        .footer-links a {
-            color: #94a3b8 !important;
-            text-decoration: none !important;
-            transition: all 0.2s ease !important;
-            display: inline-block !important;
-            font-size: 0.92rem !important;
-        }
-
-        .footer-links a:hover {
-            color: #4ade80 !important;
-            transform: translateX(4px) !important;
-        }
-
-        /* Floating CTA / WhatsApp */
-        .floating-cta {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 999;
-            background: #25d366;
-            color: #ffffff;
-            border-radius: 999px;
-            padding: 12px 22px;
-            font-weight: 700;
-            box-shadow: 0 10px 28px rgba(37, 211, 102, 0.4);
-            text-decoration: none;
             display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            min-height: 44px;
+            touch-action: manipulation;
+            transition: all 0.15s ease;
+            border: 1px solid var(--border-subtle);
+            text-align: left;
+            background-color: #FFFFFF;
+            color: var(--text-heading);
+        }
+
+        .slot-btn.slot-available {
+            border-color: #CBD5E1;
+            cursor: pointer;
+        }
+
+        .slot-btn.slot-available:hover {
+            background-color: var(--primary-emerald-light);
+            border-color: var(--primary-emerald);
+            color: var(--primary-emerald);
+        }
+
+        .slot-btn.slot-selected {
+            background-color: var(--primary-emerald) !important;
+            border-color: var(--primary-emerald) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.35);
+        }
+
+        .slot-btn.slot-selected .slot-badge {
+            background: rgba(255, 255, 255, 0.25) !important;
+            color: #FFFFFF !important;
+        }
+
+        .slot-btn.slot-booked {
+            background-color: #F8FAFC !important;
+            border-color: #E2E8F0 !important;
+            color: #94A3B8 !important;
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+
+        /* Floating WhatsApp Button */
+        .floating-whatsapp {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            z-index: 1045;
+            background: #059669;
+            color: #FFFFFF !important;
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 4px 16px rgba(5, 150, 105, 0.4);
+            text-decoration: none;
             transition: all 0.2s ease;
         }
 
-        .floating-cta:hover {
-            background: #1ebc57;
-            color: #ffffff;
+        .floating-whatsapp:hover {
+            background: #047857;
+            color: #FFFFFF !important;
             transform: translateY(-2px);
-            box-shadow: 0 14px 34px rgba(37, 211, 102, 0.55);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.5);
+        }
+
+        /* Safe padding bottom for mobile & desktop */
+        main {
+            padding-bottom: 70px !important;
+            flex: 1 0 auto;
+        }
+
+        .site-footer {
+            background: #FFFFFF;
+            border-top: 1px solid var(--border-subtle);
+            padding: 2rem 0;
+            padding-bottom: 85px !important;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 767.98px) {
+            .floating-whatsapp {
+                bottom: 16px;
+                right: 16px;
+                padding: 8px 14px;
+                font-size: 0.8rem;
+            }
+            main {
+                padding-bottom: 95px !important;
+            }
+            .site-footer {
+                padding-bottom: 105px !important;
+            }
+            .btn {
+                min-height: 42px;
+            }
+            .btn-sm {
+                min-height: 38px;
+            }
         }
     </style>
-
     @stack('styles')
 </head>
 <body>
-    <!-- Navbar dengan Bahasa Sehari-hari yang Mudah Dipahami -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container-fluid px-lg-4">
+
+    <!-- NAVBAR SEDERHANA: Logo, Pesan Lapangan, Cek Status, Login Admin -->
+    <nav class="navbar navbar-expand-lg site-navbar py-2.5">
+        <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
-                <span class="brand-mark">
-                    <img src="{{ asset('images/sm-sport-logo.svg') }}" alt="SM Sport Center logo" style="width: 24px; height: 24px;">
+                <span class="brand-badge">
+                    <i class="bi bi-dribbble"></i>
                 </span>
-                <span>
-                    SM Sport Center
-                    <small class="brand-subtitle">Sewa Lapangan Futsal & Badminton</small>
-                </span>
+                <span>SM Sport Center</span>
             </a>
 
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list fs-3 text-dark"></i>
             </button>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-1 gap-lg-3 mt-2 mt-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('home') }}">
-                            <i class="bi bi-house-door me-1"></i> Beranda
+                        <a class="nav-link fw-semibold" href="{{ route('home') }}#daftar-lapangan">
+                            <i class="bi bi-calendar-check me-1 text-success"></i> Pesan Lapangan
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ Route::is('home') ? '#daftar-lapangan' : route('home') . '#daftar-lapangan' }}">
-                            <i class="bi bi-grid me-1"></i> Daftar Lapangan
+                        <a class="nav-link fw-semibold" href="{{ route('reservations.check') }}">
+                            <i class="bi bi-search me-1 text-success"></i> Cek Status Pesanan
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ Route::is('home') ? '#faqSection' : route('home') . '#faqSection' }}">
-                            <i class="bi bi-question-circle me-1"></i> Tanya Jawab
-                        </a>
+                    <li class="nav-item ms-lg-2">
+                        @auth
+                            @if(auth()->user()->isAdmin())
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle px-3 py-1.5" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-shield-lock-fill me-1"></i> Admin ({{ auth()->user()->name }})
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border mt-1">
+                                        <li><a class="dropdown-item small" href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Dashboard Admin</a></li>
+                                        <li><a class="dropdown-item small" href="{{ route('admin.reservations.index') }}"><i class="bi bi-journal-text me-2"></i> Kelola Reservasi</a></li>
+                                        <li><a class="dropdown-item small" href="{{ route('admin.manual_booking') }}"><i class="bi bi-pencil-square me-2"></i> Booking Manual</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form action="{{ route('logout') }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="dropdown-item text-danger small"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            @else
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle px-3 py-1.5" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-person-fill me-1"></i> {{ auth()->user()->name }}
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border mt-1">
+                                        <li><a class="dropdown-item small" href="{{ route('dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Dashboard Saya</a></li>
+                                        <li><a class="dropdown-item small" href="{{ route('customer.reservations') }}"><i class="bi bi-calendar3 me-2"></i> Pesanan Saya</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form action="{{ route('logout') }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="dropdown-item text-danger small"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            @endif
+                        @else
+                            <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm px-3 py-1.5 text-muted" title="Masuk ke Panel Pengelola">
+                                <i class="bi bi-lock me-1"></i> Login Admin
+                            </a>
+                        @endauth
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ Route::is('home') ? '#kontak' : route('home') . '#kontak' }}">
-                            <i class="bi bi-telephone me-1"></i> Hubungi Kami
-                        </a>
-                    </li>
-
-                    @auth
-                        <li class="nav-item ms-lg-2">
-                            <a class="btn btn-outline-success btn-sm px-3 py-2 fw-semibold" href="{{ route('dashboard') }}">
-                                <i class="bi bi-speedometer2 me-1"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown ms-lg-1">
-                            <a class="nav-link dropdown-toggle user-pill" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                <span class="user-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-                                <span class="fw-semibold">{{ auth()->user()->name }}</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                                        <i class="bi bi-person me-2"></i> Profil Saya
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('customer.reservations') }}">
-                                        <i class="bi bi-calendar2-check me-2"></i> Pesanan Saya
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('customer.transactions') }}">
-                                        <i class="bi bi-receipt me-2"></i> Riwayat Transaksi
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider border-secondary border-opacity-25"></li>
-                                <li>
-                                    <form action="{{ route('logout') }}" method="POST" class="d-block">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item text-danger border-0 bg-transparent w-100 text-start">
-                                            <i class="bi bi-box-arrow-right me-2"></i> Keluar
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    @else
-                        <li class="nav-item ms-lg-2">
-                            <a class="nav-link text-white fw-semibold" href="{{ route('login') }}">
-                                <i class="bi bi-box-arrow-in-right me-1"></i> Masuk
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-primary btn-sm px-3 py-2 fw-bold" href="{{ route('register') }}" style="border-radius: 10px;">
-                                <i class="bi bi-person-plus me-1"></i> Daftar Akun
-                            </a>
-                        </li>
-                    @endauth
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="d-flex">
-        @auth
-            <!-- Sidebar: Menu Sederhana Bahasa Sehari-hari -->
-            @if(auth()->user()->isAdmin())
-                <aside class="sidebar">
-                    <ul class="sidebar-nav">
-                        <li class="sidebar-title">Menu Admin</li>
-                        <li>
-                            <a href="{{ route('admin.dashboard') }}" class="@routeIs('admin.dashboard') active @endrouteIs">
-                                <i class="bi bi-speedometer2"></i> Dashboard Admin
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.manual_booking') }}" class="@routeIs('admin.manual_booking*') active @endrouteIs">
-                                <i class="bi bi-person-walking"></i> Booking Kasir (Walk-in)
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.fields.index') }}" class="@routeIs('admin.fields.*') active @endrouteIs">
-                                <i class="bi bi-building"></i> Kelola Lapangan
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.users.index') }}" class="@routeIs('admin.users.*') active @endrouteIs">
-                                <i class="bi bi-people"></i> Data Pengguna
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.reservations.index') }}" class="@routeIs('admin.reservations.*') active @endrouteIs">
-                                <i class="bi bi-calendar-check"></i> Data Reservasi
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.transactions.index') }}" class="@routeIs('admin.transactions.*') active @endrouteIs">
-                                <i class="bi bi-credit-card"></i> Data Transaksi
-                            </a>
-                        </li>
-                    </ul>
-                </aside>
-            @else
-                <aside class="sidebar">
-                    <ul class="sidebar-nav">
-                        <li class="sidebar-title">Menu Utama</li>
-                        <li>
-                            <a href="{{ route('dashboard') }}" class="@routeIs('dashboard') active @endrouteIs">
-                                <i class="bi bi-house"></i> Beranda Dashboard
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('fields.index') }}" class="@routeIs('fields.*') active @endrouteIs">
-                                <i class="bi bi-building"></i> Daftar Lapangan
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('reservations.create') }}" class="@routeIs('reservations.create') active @endrouteIs">
-                                <i class="bi bi-plus-circle"></i> Pesan Lapangan
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('customer.reservations') }}" class="@routeIs('customer.reservations') active @endrouteIs">
-                                <i class="bi bi-calendar-check"></i> Pesanan Saya
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('customer.transactions') }}" class="@routeIs('customer.transactions') active @endrouteIs">
-                                <i class="bi bi-receipt"></i> Transaksi Saya
-                            </a>
-                        </li>
-                    </ul>
-                </aside>
-            @endif
-        @endauth
+    <!-- KONTEN UTAMA -->
+    <main>
+        @if(session('success'))
+            <div class="container mt-3">
+                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm d-flex align-items-center gap-2" style="background-color: #ECFDF5; border-left: 4px solid #059669 !important; color: #065F46;" role="alert">
+                    <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                    <div>{{ session('success') }}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        @endif
 
-        <!-- Main Content -->
-        <main class="flex-grow-1 @guest no-sidebar @endguest">
-            <div class="content">
-                <!-- Display Messages -->
-                @if($message = session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="background: rgba(34, 197, 94, 0.18); border: 1px solid rgba(34, 197, 94, 0.4); color: #86efac;">
-                        <i class="bi bi-check-circle-fill me-2"></i> {{ $message }}
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        @if(session('error'))
+            <div class="container mt-3">
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm d-flex align-items-center gap-2" style="background-color: #FEF2F2; border-left: 4px solid #EF4444 !important; color: #991B1B;" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+                    <div>{{ session('error') }}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        @endif
+
+        @yield('content')
+    </main>
+
+    <!-- FOOTER SEDERHANA -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="row g-3 align-items-center justify-content-between">
+                <div class="col-md-6 text-center text-md-start">
+                    <div class="fw-bold text-dark mb-1">
+                        <i class="bi bi-dribbble text-success me-1"></i> SM Sport Center
                     </div>
-                @endif
-
-                @if($message = session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5;">
-                        <i class="bi bi-exclamation-circle-fill me-2"></i> {{ $message }}
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                    <div class="small text-muted">
+                        <i class="bi bi-geo-alt text-danger me-1"></i> Jati Padang, RT/RW 006/003, Pasar Minggu, Jakarta Selatan
                     </div>
-                @endif
-
-                @if($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5;">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i> 
-                        <strong>Terjadi kesalahan:</strong>
-                        <ul class="mb-0 mt-2">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div class="small text-muted mb-1">
+                        <i class="bi bi-clock text-success me-1"></i> Buka Setiap Hari: <strong>08:00 - 23:00 WIB</strong>
                     </div>
-                @endif
-
-                @unless(Route::is('home'))
-                    <div class="mb-4">
-                        <a href="{{ url()->previous() !== url()->current() ? url()->previous() : route('home') }}" onclick="event.preventDefault(); if (window.history.length > 1) { window.history.back(); } else { window.location.href = this.getAttribute('href'); }" class="btn btn-outline-light btn-sm px-3 py-2" style="border-radius: 10px;">
-                            <i class="bi bi-arrow-left me-1"></i> Kembali
+                    <div class="small">
+                        <i class="bi bi-whatsapp text-success me-1"></i> Bantuan WhatsApp Admin: 
+                        <a href="https://wa.me/6281384665386?text=Halo%20Admin%20SM%20Sport%20Center%2C%20saya%20ingin%20bertanya%20seputar%20booking%20lapangan" target="_blank" rel="noopener noreferrer" class="fw-bold text-success">
+                            0813-8466-5386
                         </a>
                     </div>
-                @endunless
-
-                @yield('content')
-            </div>
-        </main>
-    </div>
-
-    <!-- Footer Tertata Rapi dalam Kolom-kolom yang Terstruktur -->
-    <footer class="luxury-footer @auth has-sidebar-footer @endauth">
-        <div class="container py-4">
-            <div class="row g-4 mb-4">
-                <!-- Kolom 1: Profil SM Sport Center -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <span class="brand-mark">
-                            <img src="{{ asset('images/sm-sport-logo.svg') }}" alt="SM Sport Center logo" style="width: 24px; height: 24px;">
-                        </span>
-                        <span class="fw-bold fs-5 text-white">SM Sport Center</span>
-                    </div>
-                    <p class="text-white-50 small mb-3" style="line-height: 1.7;">
-                        Pusat penyewaan lapangan futsal dan badminton terbaik di Bandung. Tempat bersih, fasilitas lengkap, pencahayaan terang, dan alur booking yang cepat serta transparan.
-                    </p>
-                    <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill" style="background: rgba(34, 197, 94, 0.14); border: 1px solid rgba(34, 197, 94, 0.3);">
-                        <i class="bi bi-clock-fill text-success"></i>
-                        <span class="small text-white fw-semibold">Buka Setiap Hari: 08.00 - 23.00 WIB</span>
-                    </div>
-                </div>
-
-                <!-- Kolom 2: Navigasi Cepat -->
-                <div class="col-lg-2 col-md-6 col-6">
-                    <h5 class="footer-col-title">
-                        <i class="bi bi-compass text-success me-1"></i> Navigasi
-                    </h5>
-                    <ul class="footer-links">
-                        <li><a href="{{ route('home') }}">Beranda</a></li>
-                        <li><a href="{{ route('home') }}#daftar-lapangan">Daftar Lapangan</a></li>
-                        <li><a href="{{ route('home') }}#faqSection">Tanya Jawab (FAQ)</a></li>
-                        <li><a href="{{ route('home') }}#kontak">Lokasi & Kontak</a></li>
-                    </ul>
-                </div>
-
-                <!-- Kolom 3: Pilihan Lapangan -->
-                <div class="col-lg-3 col-md-6 col-6">
-                    <h5 class="footer-col-title">
-                        <i class="bi bi-trophy text-info me-1"></i> Lapangan Kami
-                    </h5>
-                    <ul class="footer-links">
-                        <li><a href="{{ route('home') }}#daftar-lapangan">Futsal 1 (Lantai Standar)</a></li>
-                        <li><a href="{{ route('home') }}#daftar-lapangan">Futsal 2 (Rumput Sintetis)</a></li>
-                        <li><a href="{{ route('home') }}#daftar-lapangan">Badminton 1, 2, 3 (Indoor AC)</a></li>
-                        <li><a href="https://wa.me/6281384665386" target="_blank" rel="noopener">Sewa Event & Turnamen</a></li>
-                    </ul>
-                </div>
-
-                <!-- Kolom 4: Hubungi Kami -->
-                <div class="col-lg-3 col-md-6">
-                    <h5 class="footer-col-title">
-                        <i class="bi bi-headset text-warning me-1"></i> Hubungi Kami
-                    </h5>
-                    <div class="d-flex flex-column gap-2 text-white-50 small">
-                        <div class="d-flex align-items-start gap-2">
-                            <i class="bi bi-geo-alt-fill text-danger mt-1"></i>
-                            <span>Jl. Raya Sport Center No. 12, Bandung</span>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-whatsapp text-success"></i>
-                            <a href="https://wa.me/6281384665386" target="_blank" rel="noopener" class="text-decoration-none text-white fw-bold">
-                                0813-8466-5386
-                            </a>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-envelope-fill text-info"></i>
-                            <span>admin@sm-sport-center.com</span>
-                        </div>
-                    </div>
                 </div>
             </div>
-
-            <!-- Garis Bawah & Copyright -->
-            <div class="pt-3 mt-4 border-top border-secondary border-opacity-25 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-                <span class="text-white-50 small">
-                    &copy; {{ date('Y') }} <strong>SM Sport Center</strong>. Semua Hak Cipta Dilindungi.
-                </span>
-                <span class="text-white-50 small">
-                    Platform Booking Lapangan Futsal & Badminton
-                </span>
+            <div class="pt-3 mt-3 border-top text-center small text-muted">
+                &copy; {{ date('Y') }} <strong>SM Sport Center</strong>. Sistem Booking Lapangan Olahraga.
             </div>
         </div>
     </footer>
 
-    <!-- Tombol WhatsApp Mengambang -->
-    <a href="https://wa.me/6281384665386" class="floating-cta" target="_blank" rel="noopener" aria-label="Chat WhatsApp Admin">
-        <i class="bi bi-whatsapp fs-5"></i>
-        <span>Chat WhatsApp</span>
-    </a>
+    <!-- TOMBOL FLOATING WHATSAPP (Hanya untuk Tamu / Pelanggan, disembunyikan untuk Admin) -->
+    @if(!auth()->check() || !auth()->user()->isAdmin())
+        <a href="https://wa.me/6281384665386?text=Halo%20Admin%20SM%20Sport%20Center%20Pasar%20Minggu%2C%20saya%20ingin%20bertanya%20seputar%20jadwal%20lapangan" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat WhatsApp Admin">
+            <i class="bi bi-whatsapp fs-5"></i>
+            <span>Chat Admin</span>
+        </a>
+    @endif
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-    <script>
-        AOS.init({ duration: 600, once: true, easing: 'ease-out-cubic' });
-
-        document.querySelectorAll('.alert').forEach(function(element) {
-            if (!element.classList.contains('alert-dismissible-permanent')) {
-                setTimeout(function() {
-                    let alert = new bootstrap.Alert(element);
-                    alert.close();
-                }, 5000);
-            }
-        });
-    </script>
 
     @stack('scripts')
 </body>

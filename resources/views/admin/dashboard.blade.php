@@ -1,435 +1,737 @@
 @extends('layouts.app')
 
-@section('title', 'Admin Dashboard - SM Sport Center')
+@section('title', 'Dashboard Admin - SM Sport Center')
 
 @section('content')
-<div class="container-fluid">
-    <!-- Hero Header & Quick Action Input Booking Manual -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card p-4 shadow-lg d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3" style="background: linear-gradient(135deg, #091325, #0f1d36); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 24px;">
-                <div>
-                    <span class="badge bg-success bg-opacity-25 text-success px-3 py-1 rounded-pill fw-semibold mb-2">
-                        <i class="bi bi-shield-lock-fill me-1"></i> Admin Control Center
+<div class="container py-3">
+
+    <!-- 1. HEADER ATAS MINIMALIS -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 pb-2 border-bottom">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="bi bi-speedometer2 text-success me-2"></i>Dashboard Admin
+            </h1>
+            <p class="text-muted small mb-0">
+                <i class="bi bi-calendar3 text-success me-1"></i> {{ $todayDateIndo ?? date('d M Y') }} • SM Sport Center Pasar Minggu
+            </p>
+        </div>
+        <div>
+            <a href="{{ route('admin.manual_booking') }}" class="btn btn-primary px-3 py-2 fw-semibold shadow-sm">
+                <i class="bi bi-plus-circle me-1.5"></i> + Input Booking Manual (Walk-in)
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. RINGKASAN STATISTIK (5 KARTU SEJAJAR: PENDAPATAN HARI INI, BULANAN, TAHUNAN, JADWAL, PENDING) -->
+    <div class="row g-2 g-md-3 mb-4">
+        <!-- 1. Pendapatan Hari Ini / Tanggal Terpilih -->
+        <div class="col-6 col-md-4 col-xl">
+            <div class="card bg-white border shadow-sm p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                        {{ $isScheduleToday ? 'Pendapatan Hari Ini' : 'Pendapatan ' . $scheduleDateIndoShort }}
                     </span>
-                    <h1 class="h2 fw-bold text-white mb-1">Dashboard Admin SM Sport Center</h1>
-                    <p class="text-white-50 mb-0">Pantau pendapatan harian, verifikasi bukti pembayaran, dan kelola booking kasir.</p>
+                    <div class="rounded-circle bg-success-subtle p-1.5 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                        <i class="bi bi-cash-stack text-success fs-6"></i>
+                    </div>
                 </div>
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="{{ route('admin.manual_booking') }}" class="btn btn-success btn-lg fw-bold px-4 py-3 shadow d-flex align-items-center gap-2" style="border-radius: 14px; background: linear-gradient(135deg, #16a34a, #22c55e); border: none;">
-                        <i class="bi bi-plus-circle-fill fs-5"></i>
-                        <span>+ Input Booking Manual (Walk-in)</span>
+                <h4 class="fw-bolder text-dark mb-1 fs-5">Rp {{ number_format($todayRevenue, 0, ',', '.') }}</h4>
+                <small class="text-muted" style="font-size: 0.72rem;">
+                    <i class="bi bi-calendar-check text-success me-1"></i> {{ $scheduleDateIndoShort }}
+                </small>
+            </div>
+        </div>
+
+        <!-- 2. Pendapatan Bulanan -->
+        <div class="col-6 col-md-4 col-xl">
+            <div class="card bg-white border shadow-sm p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                        Pendapatan Bulanan
+                    </span>
+                    <div class="rounded-circle bg-info-subtle p-1.5 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                        <i class="bi bi-graph-up-arrow text-info fs-6"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bolder text-dark mb-1 fs-5">Rp {{ number_format($monthlyRevenue, 0, ',', '.') }}</h4>
+                <small class="text-muted" style="font-size: 0.72rem;">
+                    <i class="bi bi-calendar-month text-info me-1"></i> {{ $selectedMonthLabel }}
+                </small>
+            </div>
+        </div>
+
+        <!-- 3. Pendapatan Tahunan -->
+        <div class="col-6 col-md-4 col-xl">
+            <div class="card bg-white border shadow-sm p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                        Pendapatan Tahunan
+                    </span>
+                    <div class="rounded-circle bg-primary-subtle p-1.5 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                        <i class="bi bi-wallet2 text-primary fs-6"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bolder text-dark mb-1 fs-5">Rp {{ number_format($yearlyRevenue, 0, ',', '.') }}</h4>
+                <small class="text-muted" style="font-size: 0.72rem;">
+                    <i class="bi bi-trophy text-primary me-1"></i> {{ $selectedYearLabel }}
+                </small>
+            </div>
+        </div>
+
+        <!-- 4. Jadwal Main Hari Ini / Tanggal Terpilih -->
+        <div class="col-6 col-md-6 col-xl">
+            <div class="card bg-white border shadow-sm p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                        {{ $isScheduleToday ? 'Jadwal Hari Ini' : 'Jadwal ' . $scheduleDateIndoShort }}
+                    </span>
+                    <div class="rounded-circle bg-primary-subtle p-1.5 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                        <i class="bi bi-calendar2-check text-primary fs-6"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bolder text-dark mb-1 fs-5">{{ $todayPlayingCount }} <span class="fs-6 fw-normal text-muted">Sesi</span></h4>
+                <small class="text-muted" style="font-size: 0.72rem;">
+                    <i class="bi bi-geo-alt text-primary me-1"></i> {{ $isScheduleToday ? 'Pemakaian hari ini' : 'Pemakaian tanggal ini' }}
+                </small>
+            </div>
+        </div>
+
+        <!-- 5. Menunggu Pembayaran -->
+        <div class="col-12 col-md-6 col-xl">
+            <div class="card bg-white border shadow-sm p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted fw-semibold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                        Menunggu Bayar
+                    </span>
+                    <div class="rounded-circle bg-warning-subtle p-1.5 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                        <i class="bi bi-whatsapp text-warning fs-6"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bolder mb-1 fs-5" style="color: #D97706 !important;">{{ $pendingReservations->count() }} <span class="fs-6 fw-normal text-muted">Pesanan</span></h4>
+                <small class="text-muted" style="font-size: 0.72rem;">
+                    <i class="bi bi-chat-dots text-warning me-1"></i> Butuh konfirmasi WA
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. BAGIAN 1: STATUS & JADWAL LAPANGAN (REAL-TIME & VISUAL) -->
+    <div class="card bg-white border shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom py-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+            <div>
+                <h2 class="h6 fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-grid-3x3-gap-fill text-success"></i> Status & Jadwal Lapangan
+                </h2>
+                <div class="d-flex align-items-center gap-2 small text-muted">
+                    <span><i class="bi bi-calendar-check text-success me-1"></i>{{ $scheduleDateIndo }}</span>
+                    @if($isScheduleToday)
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5" style="font-size: 0.7rem;">Hari Ini</span>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Pemilih Tanggal Singkat -->
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <div class="btn-group btn-group-sm" role="group">
+                    <a href="{{ route('admin.dashboard', ['schedule_date' => $todayStr]) }}" class="btn {{ $isScheduleToday ? 'btn-success fw-bold text-white' : 'btn-outline-secondary' }}">
+                        Hari Ini
+                    </a>
+                    <a href="{{ route('admin.dashboard', ['schedule_date' => $tomorrowStr]) }}" class="btn {{ $scheduleDate === $tomorrowStr ? 'btn-success fw-bold text-white' : 'btn-outline-secondary' }}">
+                        Besok
                     </a>
                 </div>
+                <div class="input-group input-group-sm" style="width: auto;">
+                    <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-calendar3"></i></span>
+                    <input type="date" 
+                           class="form-control form-control-sm border-start-0" 
+                           value="{{ $scheduleDate }}" 
+                           min="{{ date('Y-m-d') }}" 
+                           onchange="window.location.href='{{ route('admin.dashboard') }}?schedule_date=' + this.value" 
+                           title="Pilih Tanggal Kalender">
+                </div>
             </div>
+        </div>
+
+        <!-- Panduan Kode Warna Slot -->
+        <div class="px-3 py-2 bg-light border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2 small">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <span class="text-muted fw-semibold me-1" style="font-size: 0.75rem;">Status Slot:</span>
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.72rem;">
+                    <i class="bi bi-plus-circle me-1"></i> Hijau: Tersedia (Klik untuk Booking)
+                </span>
+                <span class="badge bg-danger text-white px-2 py-1" style="font-size: 0.72rem;">
+                    <i class="bi bi-lock-fill me-1"></i> Merah: Terisi (Lunas)
+                </span>
+                <span class="badge bg-warning text-dark px-2 py-1" style="font-size: 0.72rem;">
+                    <i class="bi bi-clock-history me-1"></i> Oranye: Menunggu Bayar WA
+                </span>
+                <span class="badge bg-secondary-subtle text-muted border px-2 py-1" style="font-size: 0.72rem;">
+                    <i class="bi bi-dash-circle me-1"></i> Abu-abu: Jam Lewat
+                </span>
+            </div>
+            <div class="text-muted" style="font-size: 0.72rem;">
+                <i class="bi bi-info-circle me-1 text-primary"></i> Klik slot hijau kosong untuk langsung input booking kasir.
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            @foreach($courtMonitoring as $item)
+                @php
+                    $field = $item['field'];
+                    $rt = $item['realtime'];
+                    $slots = $item['slots'];
+                @endphp
+                <div class="p-3 {{ !$loop->last ? 'border-bottom' : '' }}">
+                    <!-- Baris Atas: Info Lapangan & Badge Status Real-Time -->
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-2">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="fw-bold text-dark fs-6">{{ $field->name }}</span>
+                            @if(strtolower($field->type) === 'futsal')
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5" style="font-size: 0.7rem;">Futsal</span>
+                            @else
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2 py-0.5" style="font-size: 0.7rem;">Badminton</span>
+                            @endif
+                            <span class="text-muted small">Rp {{ number_format($field->price_per_hour, 0, ',', '.') }}/jam</span>
+                        </div>
+
+                        <!-- Badge Status Lapangan Real-Time -->
+                        <div>
+                            @if($rt['state'] === 'maintenance')
+                                <span class="badge bg-secondary text-white py-1 px-2.5">
+                                    <i class="bi bi-slash-circle me-1"></i> Tutup / Maintenance
+                                </span>
+                            @elseif($rt['state'] === 'in_use')
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-semibold py-1 px-2.5" title="Sedang dimainkan saat ini">
+                                    <i class="bi bi-person-fill me-1"></i> Sedang Dipakai: <strong>{{ $rt['customer'] }}</strong> • {{ $rt['time'] }} WIB
+                                </span>
+                            @else
+                                <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold py-1 px-2.5">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Tersedia / Kosong Sekarang
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Baris Bawah: Deretan Kotak Slot Jam (08:00 - 22:00) -->
+                    <div class="d-flex flex-nowrap overflow-x-auto gap-1.5 pt-1 pb-1 schedule-slots-track" style="-webkit-overflow-scrolling: touch; scrollbar-width: thin;">
+                        @foreach($slots as $slot)
+                            @if($slot['status'] === 'available')
+                                <a href="{{ route('admin.manual_booking', ['field_id' => $field->id, 'reservation_date' => $scheduleDate, 'start_time' => $slot['start'], 'end_time' => $slot['end']]) }}" 
+                                   class="slot-box slot-available text-decoration-none d-flex flex-column align-items-center justify-content-center"
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   title="Tersedia: {{ $slot['start'] }} - {{ $slot['end'] }} WIB. Klik untuk booking manual.">
+                                    <span class="slot-time fw-bold">{{ $slot['start'] }}</span>
+                                    <span class="slot-sub text-success small"><i class="bi bi-plus"></i></span>
+                                </a>
+                            @elseif($slot['status'] === 'booked')
+                                @if($slot['res_status'] === 'confirmed')
+                                    <button type="button" 
+                                            class="slot-box slot-booked-confirmed border-0 d-flex flex-column align-items-center justify-content-center" 
+                                            data-bs-toggle="tooltip" 
+                                            data-bs-html="true" 
+                                            title="<strong>{{ e($slot['customer_name']) }}</strong> (LUNAS)<br>Kode: {{ $slot['booking_code'] }}<br>Jam: {{ $slot['start'] }} - {{ $slot['end'] }} WIB<br><em>Klik untuk rincian</em>"
+                                            onclick="showSlotDetail('{{ $slot['booking_code'] }}', '{{ addslashes($slot['customer_name']) }}', '{{ $slot['customer_phone'] }}', '{{ addslashes($field->name) }}', '{{ $scheduleDateIndo }}', '{{ $slot['start'] }} - {{ $slot['end'] }} WIB', 'Lunas / Terkonfirmasi', '{{ number_format($slot['total_price'], 0, ',', '.') }}', '{{ $slot['res_id'] }}', 'confirmed', '{{ addslashes($slot['notes'] ?? '') }}')">
+                                        <span class="slot-time fw-bold text-white">{{ $slot['start'] }}</span>
+                                        <span class="slot-sub text-white-50"><i class="bi bi-lock-fill"></i></span>
+                                    </button>
+                                @else
+                                    <button type="button" 
+                                            class="slot-box slot-booked-pending border-0 d-flex flex-column align-items-center justify-content-center" 
+                                            data-bs-toggle="tooltip" 
+                                            data-bs-html="true" 
+                                            title="<strong>{{ e($slot['customer_name']) }}</strong> (MENUNGGU BAYAR)<br>Kode: {{ $slot['booking_code'] }}<br>Jam: {{ $slot['start'] }} - {{ $slot['end'] }} WIB<br><em>Klik untuk rincian</em>"
+                                            onclick="showSlotDetail('{{ $slot['booking_code'] }}', '{{ addslashes($slot['customer_name']) }}', '{{ $slot['customer_phone'] }}', '{{ addslashes($field->name) }}', '{{ $scheduleDateIndo }}', '{{ $slot['start'] }} - {{ $slot['end'] }} WIB', 'Menunggu Pembayaran via WhatsApp', '{{ number_format($slot['total_price'], 0, ',', '.') }}', '{{ $slot['res_id'] }}', 'pending', '{{ addslashes($slot['notes'] ?? '') }}')">
+                                        <span class="slot-time fw-bold text-dark">{{ $slot['start'] }}</span>
+                                        <span class="slot-sub text-dark-50"><i class="bi bi-clock-history"></i></span>
+                                    </button>
+                                @endif
+                            @else
+                                <div class="slot-box slot-past d-flex flex-column align-items-center justify-content-center" 
+                                     data-bs-toggle="tooltip" 
+                                     data-bs-placement="top" 
+                                     title="Jam telah lewat ({{ $slot['start'] }} - {{ $slot['end'] }} WIB)">
+                                    <span class="slot-time text-muted">{{ $slot['start'] }}</span>
+                                    <span class="slot-sub text-muted" style="font-size: 0.65rem;">Lewat</span>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
         </div>
     </div>
 
-    <!-- Ringkasan Hari Ini (Prioritas Utama Admin) -->
-    <div class="row g-3 mb-4">
-        <!-- Pendapatan Hari Ini -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card p-3 h-100 shadow-sm" style="background: #0f1d36; border: 1px solid rgba(34, 197, 94, 0.35); border-radius: 18px;">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-white-50 small fw-semibold text-uppercase">Pendapatan Hari Ini</span>
-                    <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(34, 197, 94, 0.15); width: 42px; height: 42px;">
-                        <i class="bi bi-cash-stack text-success fs-5"></i>
-                    </div>
+    <!-- 4. BAGIAN 2: MENUNGGU KONFIRMASI PEMBAYARAN -->
+    @if($pendingReservations->isNotEmpty())
+        <div class="card bg-white border shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-warning text-dark px-2.5 py-1 fw-bold rounded-pill">{{ $pendingReservations->count() }}</span>
+                    <h2 class="h6 fw-bold text-dark mb-0">
+                        <i class="bi bi-whatsapp text-success me-1"></i> Menunggu Konfirmasi Pembayaran
+                    </h2>
                 </div>
-                <h3 class="fw-bold mb-1" style="color: #4ade80;">Rp {{ number_format($todayRevenue, 0, ',', '.') }}</h3>
-                <small class="text-white-50"><i class="bi bi-calendar-check text-success"></i> Transaksi lunas hari ini</small>
+                <small class="text-muted">Konfirmasi pesanan setelah pembayaran via WhatsApp diterima.</small>
             </div>
-        </div>
 
-        <!-- Booking Dibuat Hari Ini -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card p-3 h-100 shadow-sm" style="background: #0f1d36; border: 1px solid rgba(59, 130, 246, 0.35); border-radius: 18px;">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-white-50 small fw-semibold text-uppercase">Booking Hari Ini</span>
-                    <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(59, 130, 246, 0.15); width: 42px; height: 42px;">
-                        <i class="bi bi-calendar-plus text-primary fs-5"></i>
-                    </div>
-                </div>
-                <h3 class="fw-bold text-white mb-1">{{ $todayBookingsCount }} <span class="fs-6 fw-normal text-white-50">Booking</span></h3>
-                <small class="text-white-50"><i class="bi bi-clock-history text-info"></i> Dibuat pada tanggal {{ date('d M Y') }}</small>
-            </div>
-        </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small text-muted">
+                        <tr>
+                            <th>KODE BOOKING</th>
+                            <th>PEMESAN & WHATSAPP</th>
+                            <th>LAPANGAN</th>
+                            <th>JADWAL MAIN</th>
+                            <th>TOTAL TAGIHAN</th>
+                            <th>WAKTU PESAN</th>
+                            <th class="text-center" style="min-width: 200px;">AKSI CEPAT</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        @foreach($pendingReservations as $rsv)
+                            @php
+                                $cName = trim($rsv->customer_name ?? '');
+                                if (empty($cName) || strcasecmp($cName, 'admin') === 0) {
+                                    $cName = ($rsv->user && !$rsv->user->isAdmin() && strcasecmp($rsv->user->name, 'admin') !== 0) ? $rsv->user->name : 'Pelanggan Tamu';
+                                }
+                                $cPhone = trim($rsv->customer_phone ?? '');
+                                if (empty($cPhone) || $cPhone === '-') {
+                                    $cPhone = ($rsv->user && !$rsv->user->isAdmin()) ? ($rsv->user->phone ?? '-') : '-';
+                                }
+                                $cleanPhone = preg_replace('/[^0-9]/', '', $cPhone);
 
-        <!-- Jadwal Main Hari Ini -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card p-3 h-100 shadow-sm" style="background: #0f1d36; border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 18px;">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-white-50 small fw-semibold text-uppercase">Jadwal Main Hari Ini</span>
-                    <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(245, 158, 11, 0.15); width: 42px; height: 42px;">
-                        <i class="bi bi-dribbble text-warning fs-5"></i>
-                    </div>
-                </div>
-                <h3 class="fw-bold text-white mb-1">{{ $todayPlayingCount }} <span class="fs-6 fw-normal text-white-50">Sesi Main</span></h3>
-                <small class="text-white-50"><i class="bi bi-geo-alt text-warning"></i> Pemakaian lapangan hari ini</small>
-            </div>
-        </div>
-
-        <!-- Menunggu Verifikasi Bukti Bayar -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card p-3 h-100 shadow-sm" style="background: #0f1d36; border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 18px;">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-white-50 small fw-semibold text-uppercase">Perlu Verifikasi</span>
-                    <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(239, 68, 68, 0.15); width: 42px; height: 42px;">
-                        <i class="bi bi-receipt-cutoff text-danger fs-5"></i>
-                    </div>
-                </div>
-                <h3 class="fw-bold mb-1" style="color: #f87171;">{{ $pendingVerifications->count() }} <span class="fs-6 fw-normal text-white-50">Menunggu</span></h3>
-                <small class="text-white-50"><i class="bi bi-exclamation-circle text-danger"></i> Bukti transfer butuh approval</small>
-            </div>
-        </div>
-    </div>
-
-    <!-- Section 1-Klik Verifikasi Bukti Pembayaran -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-lg p-4" style="background: #0f1d36; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px;">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-danger rounded-pill px-2 py-1 small">{{ $pendingVerifications->count() }}</span>
-                        <h4 class="h5 fw-bold text-white mb-0">
-                            <i class="bi bi-check2-circle text-success me-1"></i> Verifikasi Bukti Pembayaran (1-Klik)
-                        </h4>
-                    </div>
-                    <span class="text-white-50 small">Persetujuan instan mengubah status menjadi Lunas & Dikonfirmasi</span>
-                </div>
-
-                @if($pendingVerifications->isNotEmpty())
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0" style="color: #f1f5f9;">
-                            <thead>
-                                <tr class="text-white-50 small border-secondary border-opacity-25">
-                                    <th>KODE BOOKING</th>
-                                    <th>PELANGGAN & KONTAK</th>
-                                    <th>LAPANGAN & JADWAL</th>
-                                    <th>TOTAL TAGIHAN</th>
-                                    <th>BUKTI BAYAR</th>
-                                    <th>WAKTU UPLOAD</th>
-                                    <th class="text-center" style="min-width: 170px;">AKSI 1-KLIK</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($pendingVerifications as $trx)
-                                    @php
-                                        $rsv = $trx->reservation;
-                                        $custName = $rsv?->customer_name ?: $trx->user?->name;
-                                        $custPhone = $rsv?->customer_phone ?: $trx->user?->phone;
-                                    @endphp
-                                    <tr class="border-secondary border-opacity-25">
-                                        <td>
-                                            <span class="fw-bold font-monospace text-success">{{ $rsv?->code ?? $trx->transaction_code }}</span>
-                                            <div class="text-white-50 small font-monospace">{{ $trx->transaction_code }}</div>
-                                        </td>
-                                        <td>
-                                            <strong class="text-white">{{ $custName }}</strong>
-                                            @if($custPhone)
-                                                <div class="small">
-                                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $custPhone) }}" target="_blank" rel="noopener" class="text-decoration-none text-info">
-                                                        <i class="bi bi-whatsapp text-success me-1"></i> {{ $custPhone }}
-                                                    </a>
-                                                </div>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-secondary bg-opacity-50 text-white">{{ $rsv?->field?->name ?? 'Lapangan' }}</span>
-                                            <div class="small text-white-50 mt-1">
-                                                {{ $rsv?->reservation_date?->format('d M Y') }} • {{ substr($rsv?->start_time, 0, 5) }} - {{ substr($rsv?->end_time, 0, 5) }}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <strong class="fs-6" style="color: #4ade80;">Rp {{ number_format($trx->amount, 0, ',', '.') }}</strong>
-                                            <div class="small text-white-50 text-uppercase">{{ $trx->payment_method }}</div>
-                                        </td>
-                                        <td>
-                                            @if($trx->payment_proof)
-                                                <button type="button" class="btn btn-sm btn-outline-info d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#proofModal{{ $trx->id }}">
-                                                    <i class="bi bi-image"></i> Lihat Bukti
-                                                </button>
-
-                                                <!-- Modal Preview Bukti Bayar -->
-                                                <div class="modal fade" id="proofModal{{ $trx->id }}" tabindex="-1" aria-hidden="true">
-                                                    <div class="modal-dialog modal-dialog-centered modal-lg">
-                                                        <div class="modal-content text-white" style="background: #0f1d36; border: 1px solid rgba(255, 255, 255, 0.15);">
-                                                            <div class="modal-header border-secondary border-opacity-25">
-                                                                <h5 class="modal-title">Bukti Pembayaran: {{ $rsv?->code ?? $trx->transaction_code }}</h5>
-                                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                                            </div>
-                                                            <div class="modal-body text-center p-3">
-                                                                <img src="{{ asset($trx->payment_proof) }}" alt="Bukti Pembayaran" class="img-fluid rounded-3 shadow-lg" style="max-height: 520px; object-fit: contain;">
-                                                            </div>
-                                                            <div class="modal-footer border-secondary border-opacity-25 justify-content-between">
-                                                                <span class="text-white-50 small">Pelanggan: {{ $custName }} (Rp {{ number_format($trx->amount, 0, ',', '.') }})</span>
-                                                                <a href="{{ asset($trx->payment_proof) }}" target="_blank" class="btn btn-sm btn-outline-light">
-                                                                    <i class="bi bi-box-arrow-up-right me-1"></i> Buka Ukuran Penuh
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <span class="text-white-50 small">Belum diupload</span>
-                                            @endif
-                                        </td>
-                                        <td class="small text-white-50">
-                                            {{ $trx->payment_proof_uploaded_at?->diffForHumans() ?? $trx->updated_at->diffForHumans() }}
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <!-- Tombol Terima (Approve) 1-Klik -->
-                                                <form action="{{ route('admin.transactions.verify', $trx->id) }}" method="POST" onsubmit="return confirm('Terima pembayaran ini dan konfirmasi jadwal reservasi?')">
-                                                    @csrf
-                                                    <input type="hidden" name="action" value="approve">
-                                                    <button type="submit" class="btn btn-sm btn-success fw-bold px-3 py-1 shadow-sm d-flex align-items-center gap-1">
-                                                        <i class="bi bi-check-lg fs-6"></i> Terima
-                                                    </button>
-                                                </form>
-
-                                                <!-- Tombol Tolak (Reject) 1-Klik -->
-                                                <form action="{{ route('admin.transactions.verify', $trx->id) }}" method="POST" onsubmit="return confirm('Tolak pembayaran ini dan batalkan jadwal reservasi?')">
-                                                    @csrf
-                                                    <input type="hidden" name="action" value="reject">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger fw-semibold px-2 py-1">
-                                                        <i class="bi bi-x-lg"></i> Tolak
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="text-center py-4">
-                        <i class="bi bi-check-circle-fill text-success fs-1 d-block mb-2"></i>
-                        <h6 class="text-white fw-bold mb-1">Semua Bukti Pembayaran Telah Diverifikasi</h6>
-                        <p class="text-white-50 small mb-0">Tidak ada bukti transfer yang tertunda saat ini. Booking baru akan otomatis muncul di sini.</p>
-                    </div>
-                @endif
-            </div>
-        </div>
-    </div>
-
-    <!-- Ringkasan Statistik Global & Grafik -->
-    <div class="row g-3 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="card p-3" style="background: #0f1d36; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 18px;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-white-50 small text-uppercase fw-semibold d-block">Total Pelanggan</span>
-                        <h4 class="fw-bold text-white mb-0">{{ $totalUsers }}</h4>
-                    </div>
-                    <div class="p-2 rounded-circle bg-primary bg-opacity-20 text-primary">
-                        <i class="bi bi-people fs-4"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card p-3" style="background: #0f1d36; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 18px;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-white-50 small text-uppercase fw-semibold d-block">Total Lapangan</span>
-                        <h4 class="fw-bold text-white mb-0">{{ $totalFields }} Lapangan</h4>
-                    </div>
-                    <div class="p-2 rounded-circle bg-info bg-opacity-20 text-info">
-                        <i class="bi bi-building fs-4"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card p-3" style="background: #0f1d36; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 18px;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-white-50 small text-uppercase fw-semibold d-block">Total Seluruh Reservasi</span>
-                        <h4 class="fw-bold text-white mb-0">{{ $totalReservations }}</h4>
-                    </div>
-                    <div class="p-2 rounded-circle bg-warning bg-opacity-20 text-warning">
-                        <i class="bi bi-calendar-check fs-4"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card p-3" style="background: #0f1d36; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 18px;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-white-50 small text-uppercase fw-semibold d-block">Total Revenue</span>
-                        <h4 class="fw-bold text-white mb-0">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</h4>
-                    </div>
-                    <div class="p-2 rounded-circle bg-success bg-opacity-20 text-success">
-                        <i class="bi bi-credit-card fs-4"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Grafik Reservasi & Revenue 7 Hari Terakhir -->
-    <div class="row g-4 mb-4">
-        <div class="col-xl-6">
-            <div class="card p-4 h-100 shadow-sm" style="background: #0f1d36; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px;">
-                <h5 class="card-title text-white fw-bold mb-3">
-                    <i class="bi bi-bar-chart text-primary me-2"></i> Grafik Reservasi (7 Hari Terakhir)
-                </h5>
-                <div class="chart-panel" style="min-height: 280px;">
-                    <canvas id="reservationChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-6">
-            <div class="card p-4 h-100 shadow-sm" style="background: #0f1d36; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px;">
-                <h5 class="card-title text-white fw-bold mb-3">
-                    <i class="bi bi-graph-up text-success me-2"></i> Grafik Pendapatan (7 Hari Terakhir)
-                </h5>
-                <div class="chart-panel" style="min-height: 280px;">
-                    <canvas id="revenueChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reservasi Terbaru -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card p-4 shadow-sm" style="background: #0f1d36; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px;">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="card-title text-white fw-bold mb-0">
-                        <i class="bi bi-calendar2-range text-info me-2"></i> Reservasi Terbaru
-                    </h5>
-                    <a href="{{ route('admin.reservations.index') }}" class="btn btn-sm btn-outline-light">
-                        Lihat Semua Reservasi
-                    </a>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" style="color: #f1f5f9;">
-                        <thead>
-                            <tr class="text-white-50 small border-secondary border-opacity-25">
-                                <th>KODE</th>
-                                <th>PELANGGAN</th>
-                                <th>LAPANGAN</th>
-                                <th>TANGGAL & JAM</th>
-                                <th>STATUS</th>
-                                <th>TOTAL</th>
-                                <th class="text-end">AKSI</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($recentReservations as $rsv)
-                                <tr class="border-secondary border-opacity-25">
-                                    <td><strong class="text-success font-monospace">{{ $rsv->code }}</strong></td>
-                                    <td>
-                                        <div class="text-white fw-semibold">{{ $rsv->customer_name ?: $rsv->user->name }}</div>
-                                        <div class="text-white-50 small">{{ $rsv->customer_phone ?: $rsv->user->phone }}</div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-secondary bg-opacity-50 text-white">{{ $rsv->field->name }}</span>
-                                    </td>
-                                    <td class="small">
-                                        <div class="text-white">{{ $rsv->reservation_date->format('d M Y') }}</div>
-                                        <div class="text-white-50">{{ substr($rsv->start_time, 0, 5) }} - {{ substr($rsv->end_time, 0, 5) }} WIB</div>
-                                    </td>
-                                    <td>
-                                        @if($rsv->status === 'confirmed')
-                                            <span class="badge bg-success">Terkonfirmasi</span>
-                                        @elseif($rsv->status === 'cancelled')
-                                            <span class="badge bg-danger">Dibatalkan</span>
-                                        @else
-                                            <span class="badge bg-warning text-dark">Pending</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <strong style="color: #4ade80;">Rp {{ number_format($rsv->total_price, 0, ',', '.') }}</strong>
-                                    </td>
-                                    <td class="text-end">
-                                        <div class="d-inline-flex gap-1">
-                                            <a href="{{ route('reservations.ticket', $rsv->id) }}" class="btn btn-sm btn-outline-success" target="_blank" title="Cetak Tiket/Struk">
-                                                <i class="bi bi-printer"></i>
-                                            </a>
-                                            <a href="{{ route('admin.reservations.show', $rsv->id) }}" class="btn btn-sm btn-outline-light" title="Detail">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
+                                $indoDaysShort = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+                                $indoMonthsShort = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                                $rDate = \Carbon\Carbon::parse($rsv->reservation_date);
+                                $dateStr = $indoDaysShort[$rDate->dayOfWeek] . ', ' . $rDate->day . ' ' . $indoMonthsShort[$rDate->month] . ' ' . $rDate->year;
+                                $timeStr = \Carbon\Carbon::parse($rsv->start_time)->format('H:i') . ' - ' . \Carbon\Carbon::parse($rsv->end_time)->format('H:i') . ' WIB';
+                            @endphp
+                            <tr>
+                                <td>
+                                    <span class="fw-bold font-monospace text-dark fs-6">{{ $rsv->code }}</span>
+                                    @if($rsv->notes)
+                                        <div class="text-muted" style="font-size: 0.72rem;" title="{{ $rsv->notes }}">
+                                            <i class="bi bi-chat-left-text me-1"></i>{{ Str::limit($rsv->notes, 25) }}
                                         </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="text-center text-white-50 py-3">Belum ada data reservasi.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                                    @endif
+                                </td>
+                                <td>
+                                    <strong class="text-dark d-block">{{ $cName }}</strong>
+                                    @if($cleanPhone)
+                                        <a href="https://wa.me/{{ $cleanPhone }}" target="_blank" rel="noopener noreferrer" class="text-success text-decoration-none fw-semibold" style="font-size: 0.78rem;">
+                                            <i class="bi bi-whatsapp me-1"></i> {{ $cPhone }}
+                                        </a>
+                                    @else
+                                        <span class="text-muted" style="font-size: 0.78rem;">-</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <strong class="text-dark">{{ $rsv->field->name }}</strong>
+                                    <span class="badge bg-light text-dark border ms-1" style="font-size: 0.68rem;">{{ ucfirst($rsv->field->type) }}</span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">{{ $dateStr }}</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">{{ $timeStr }}</div>
+                                </td>
+                                <td>
+                                    <strong class="text-success fs-6">Rp {{ number_format($rsv->total_price, 0, ',', '.') }}</strong>
+                                    <div class="text-muted" style="font-size: 0.72rem;">({{ $rsv->duration_hours }} Jam)</div>
+                                </td>
+                                <td class="text-muted" style="font-size: 0.75rem;">
+                                    {{ $rsv->created_at->diffForHumans() }}
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center align-items-center gap-1.5">
+                                        <!-- Tombol Konfirmasi Lunas -->
+                                        <form action="{{ route('admin.reservations.status', $rsv->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Konfirmasi LUNAS pesanan {{ $rsv->code }} dan kunci jadwal?')">
+                                            @csrf
+                                            <input type="hidden" name="status" value="confirmed">
+                                            <button type="submit" class="btn btn-sm btn-success fw-bold px-2.5 py-1 shadow-sm d-flex align-items-center gap-1" title="Konfirmasi Lunas">
+                                                <i class="bi bi-check-circle-fill"></i> Lunas
+                                            </button>
+                                        </form>
+
+                                        <!-- Tombol Batalkan -->
+                                        <form action="{{ route('admin.reservations.status', $rsv->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Batalkan pesanan {{ $rsv->code }} dan buka slot jam?')">
+                                            @csrf
+                                            <input type="hidden" name="status" value="cancelled">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger fw-semibold px-2 py-1" title="Batalkan Pesanan">
+                                                <i class="bi bi-x-circle"></i> Batal
+                                            </button>
+                                        </form>
+
+                                        <!-- Tombol Struk -->
+                                        <a href="{{ route('reservations.ticket', $rsv->id) }}?code={{ $rsv->code }}" target="_blank" class="btn btn-sm btn-outline-secondary px-2 py-1" title="Cetak Struk">
+                                            <i class="bi bi-printer"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @else
+        <!-- Keadaan Kosong Ringkas (1 Baris Teks Kecil Saja) -->
+        <div class="p-3 bg-white rounded-3 border shadow-sm text-muted small mb-4 d-flex align-items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success fs-5"></i>
+            <span>Tidak ada pesanan yang menunggu pembayaran saat ini. Semua reservasi telah terkonfirmasi lunas atau selesai.</span>
+        </div>
+    @endif
+
+    <!-- 4. BAGIAN 2: DAFTAR RESERVASI & JADWAL MAIN -->
+    <div class="card bg-white border shadow-sm">
+        <div class="card-header bg-white border-bottom py-3 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+            <div>
+                <h2 class="h6 fw-bold text-dark mb-0">
+                    <i class="bi bi-calendar2-range text-success me-1.5"></i> Daftar Reservasi & Jadwal Main
+                </h2>
+                <small class="text-muted">Data reservasi terbaru yang tercatat di sistem.</small>
+            </div>
+            <!-- Filter Cepat: Semua / Hari Ini -->
+            <div class="btn-group p-1 bg-light border rounded-3" role="group" aria-label="Filter Reservasi">
+                <button type="button" class="btn btn-sm btn-outline-secondary active rsv-tab-btn" data-filter="all">
+                    Semua ({{ $recentReservations->count() }})
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary rsv-tab-btn" data-filter="today">
+                    Hari Ini ({{ $recentReservations->filter(fn($r) => \Carbon\Carbon::parse($r->reservation_date)->isToday())->count() }})
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="reservationsTable">
+                <thead class="table-light small text-muted">
+                    <tr>
+                        <th>KODE</th>
+                        <th>PEMESAN & WHATSAPP</th>
+                        <th>LAPANGAN</th>
+                        <th>TANGGAL & JAM MAIN</th>
+                        <th>STATUS</th>
+                        <th>TOTAL</th>
+                        <th class="text-end" style="min-width: 140px;">AKSI</th>
+                    </tr>
+                </thead>
+                <tbody class="small">
+                    @forelse($recentReservations as $rsv)
+                        @php
+                            $cName = trim($rsv->customer_name ?? '');
+                            if (empty($cName) || strcasecmp($cName, 'admin') === 0) {
+                                $cName = ($rsv->user && !$rsv->user->isAdmin() && strcasecmp($rsv->user->name, 'admin') !== 0) ? $rsv->user->name : 'Pelanggan Tamu';
+                            }
+                            $cPhone = trim($rsv->customer_phone ?? '');
+                            if (empty($cPhone) || $cPhone === '-') {
+                                $cPhone = ($rsv->user && !$rsv->user->isAdmin()) ? ($rsv->user->phone ?? '-') : '-';
+                            }
+                            $cleanPhone = preg_replace('/[^0-9]/', '', $cPhone);
+
+                            $indoDaysShort = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+                            $indoMonthsShort = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                            $rDate = \Carbon\Carbon::parse($rsv->reservation_date);
+                            $isToday = $rDate->isToday();
+                            $dateStr = $indoDaysShort[$rDate->dayOfWeek] . ', ' . $rDate->day . ' ' . $indoMonthsShort[$rDate->month] . ' ' . $rDate->year;
+                            $timeStr = \Carbon\Carbon::parse($rsv->start_time)->format('H:i') . ' - ' . \Carbon\Carbon::parse($rsv->end_time)->format('H:i') . ' WIB';
+                        @endphp
+                        <tr class="rsv-row-item" data-today="{{ $isToday ? '1' : '0' }}">
+                            <td>
+                                <strong class="font-monospace text-dark">{{ $rsv->code }}</strong>
+                            </td>
+                            <td>
+                                <strong class="text-dark d-block">{{ $cName }}</strong>
+                                @if($cleanPhone)
+                                    <a href="https://wa.me/{{ $cleanPhone }}" target="_blank" rel="noopener noreferrer" class="text-success text-decoration-none fw-semibold" style="font-size: 0.78rem;">
+                                        <i class="bi bi-whatsapp me-1"></i> {{ $cPhone }}
+                                    </a>
+                                @else
+                                    <span class="text-muted" style="font-size: 0.78rem;">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                <strong class="text-dark">{{ $rsv->field->name }}</strong>
+                                <span class="badge bg-light text-dark border ms-1" style="font-size: 0.68rem;">{{ ucfirst($rsv->field->type) }}</span>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark">{{ $dateStr }}</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">{{ $timeStr }} ({{ $rsv->duration_hours }} Jam)</div>
+                            </td>
+                            <td>
+                                @if($rsv->status === 'confirmed')
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2">
+                                        <i class="bi bi-patch-check-fill me-1"></i> Lunas
+                                    </span>
+                                @elseif($rsv->status === 'cancelled')
+                                    <span class="badge bg-danger-subtle text-danger border border-danger py-1 px-2">
+                                        <i class="bi bi-x-circle me-1"></i> Batal
+                                    </span>
+                                @else
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1 px-2">
+                                        <i class="bi bi-clock-history me-1"></i> Menunggu
+                                    </span>
+                                @endif
+                            </td>
+                            <td>
+                                <strong class="text-dark">Rp {{ number_format($rsv->total_price, 0, ',', '.') }}</strong>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1 align-items-center">
+                                    @if($rsv->status === 'pending')
+                                        <form action="{{ route('admin.reservations.status', $rsv->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Konfirmasi Lunas {{ $rsv->code }}?')">
+                                            @csrf
+                                            <input type="hidden" name="status" value="confirmed">
+                                            <button type="submit" class="btn btn-sm btn-success py-0.5 px-2 fw-semibold" title="Konfirmasi Lunas">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('admin.reservations.status', $rsv->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Batalkan pesanan {{ $rsv->code }}?')">
+                                            @csrf
+                                            <input type="hidden" name="status" value="cancelled">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger py-0.5 px-1.5" title="Batalkan">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    <a href="{{ route('reservations.ticket', $rsv->id) }}?code={{ $rsv->code }}" class="btn btn-sm btn-outline-secondary py-0.5 px-2" target="_blank" title="Cetak Tiket/Struk">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
+                                    <a href="{{ route('admin.reservations.show', $rsv->id) }}" class="btn btn-sm btn-outline-primary py-0.5 px-2" title="Detail">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Belum ada data reservasi tercatat.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Rincian Booking Slot -->
+    <div class="modal fade" id="slotDetailModal" tabindex="-1" aria-labelledby="slotDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header border-bottom py-3 px-4">
+                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="slotDetailModalLabel">
+                        <i class="bi bi-ticket-detailed text-success"></i> Rincian Pesanan Slot
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                        <div>
+                            <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 0.72rem;">Kode Booking</small>
+                            <span class="fs-5 fw-bold font-monospace text-dark" id="modalBookingCode">-</span>
+                        </div>
+                        <span id="modalStatusBadge" class="badge bg-success-subtle text-success border border-success-subtle py-1.5 px-2.5 fw-semibold">-</span>
+                    </div>
+
+                    <div class="row g-3 small">
+                        <div class="col-6">
+                            <span class="text-muted d-block">Nama Pemesan:</span>
+                            <strong class="text-dark fs-6" id="modalCustomerName">-</strong>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted d-block">No. WhatsApp:</span>
+                            <span id="modalCustomerPhone" class="fs-6">-</span>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted d-block">Lapangan:</span>
+                            <strong class="text-dark" id="modalFieldName">-</strong>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted d-block">Total Tarif:</span>
+                            <strong class="text-success fs-6" id="modalTotalPrice">-</strong>
+                        </div>
+                        <div class="col-12">
+                            <span class="text-muted d-block">Jadwal Main:</span>
+                            <strong class="text-dark" id="modalScheduleTime">-</strong>
+                        </div>
+                        <div class="col-12" id="modalNotesContainer" style="display: none;">
+                            <span class="text-muted d-block mb-1">Catatan Pesanan:</span>
+                            <div class="p-2.5 rounded bg-light border text-muted small" id="modalNotes">-</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top py-2.5 px-4 bg-light d-flex justify-content-between">
+                    <a href="#" id="modalWaBtn" target="_blank" rel="noopener noreferrer" class="btn btn-outline-success btn-sm fw-semibold">
+                        <i class="bi bi-whatsapp me-1"></i> Hubungi WhatsApp
+                    </a>
+                    <div class="d-flex gap-2" id="modalActionButtons">
+                        <a href="#" id="modalTicketBtn" target="_blank" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-printer me-1"></i> Cetak Bukti
+                        </a>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
+
+<style>
+.schedule-slots-track::-webkit-scrollbar {
+    height: 4px;
+}
+.schedule-slots-track::-webkit-scrollbar-track {
+    background: #F1F5F9;
+}
+.schedule-slots-track::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 4px;
+}
+.slot-box {
+    min-width: 54px;
+    width: 54px;
+    height: 44px;
+    border-radius: 8px;
+    padding: 3px 2px;
+    text-align: center;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    user-select: none;
+}
+.slot-time {
+    font-size: 0.72rem;
+    line-height: 1.15;
+    display: block;
+}
+.slot-sub {
+    font-size: 0.65rem;
+    line-height: 1;
+    display: block;
+}
+.slot-available {
+    background: #ECFDF5;
+    border: 1px solid #A7F3D0;
+    color: #065F46;
+}
+.slot-available:hover {
+    background: #10B981;
+    border-color: #059669;
+    color: #FFFFFF !important;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(16, 185, 129, 0.25);
+}
+.slot-available:hover .slot-sub {
+    color: #FFFFFF !important;
+}
+.slot-booked-confirmed {
+    background: #EF4444;
+    border: 1px solid #DC2626;
+    color: #FFFFFF;
+}
+.slot-booked-confirmed:hover {
+    background: #DC2626;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(239, 68, 68, 0.3);
+}
+.slot-booked-pending {
+    background: #F59E0B;
+    border: 1px solid #D97706;
+    color: #111827;
+}
+.slot-booked-pending:hover {
+    background: #D97706;
+    color: #FFFFFF !important;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(245, 158, 11, 0.3);
+}
+.slot-booked-pending:hover .slot-time,
+.slot-booked-pending:hover .slot-sub {
+    color: #FFFFFF !important;
+}
+.slot-past {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    color: #94A3B8;
+    opacity: 0.75;
+}
+</style>
 
 @push('scripts')
 <script>
-    // Reservation Chart
-    const resCtx = document.getElementById('reservationChart')?.getContext('2d');
-    if (resCtx) {
-        new Chart(resCtx, {
-            type: 'line',
-            data: {
-                labels: {!! json_encode($reservationData->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'))) !!},
-                datasets: [{
-                    label: 'Reservasi',
-                    data: {!! json_encode($reservationData->pluck('count')) !!},
-                    borderColor: '#22c55e',
-                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                    tension: 0.3,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    y: { ticks: { color: '#94a3b8', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } }
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Tab filter untuk daftar reservasi
+    const filterButtons = document.querySelectorAll('.rsv-tab-btn');
+    const tableRows = document.querySelectorAll('.rsv-row-item');
+
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            filterButtons.forEach(b => {
+                b.classList.remove('active');
+                b.classList.remove('btn-primary');
+                b.classList.add('btn-outline-secondary');
+            });
+            this.classList.add('active');
+
+            const filterType = this.dataset.filter;
+            tableRows.forEach(row => {
+                const isToday = row.dataset.today === '1';
+                if (filterType === 'all' || (filterType === 'today' && isToday)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
                 }
-            }
+            });
         });
+    });
+
+    // 2. Inisialisasi Tooltip Bootstrap untuk setiap slot
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+// 3. Fungsi Tampilkan Modal Rincian Booking Slot
+function showSlotDetail(code, customer, phone, field, dateStr, timeStr, status, price, resId, resStatus, notes) {
+    document.getElementById('modalBookingCode').textContent = code;
+    document.getElementById('modalCustomerName').textContent = customer;
+    document.getElementById('modalFieldName').textContent = field;
+    document.getElementById('modalScheduleTime').textContent = dateStr + ' • ' + timeStr;
+    document.getElementById('modalTotalPrice').textContent = 'Rp ' + price;
+
+    const cleanPhone = phone ? phone.replace(/[^0-9]/g, '') : '';
+    const phoneEl = document.getElementById('modalCustomerPhone');
+    const waBtn = document.getElementById('modalWaBtn');
+    if (cleanPhone && cleanPhone.length >= 6) {
+        phoneEl.innerHTML = '<a href="https://wa.me/' + cleanPhone + '" target="_blank" class="fw-semibold text-success"><i class="bi bi-whatsapp me-1"></i>' + phone + '</a>';
+        waBtn.href = 'https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent('Halo ' + customer + ', kami dari SM Sport Center ingin konfirmasi booking Anda dengan Kode ' + code + ' untuk lapangan ' + field + ' (' + timeStr + ').');
+        waBtn.style.display = 'inline-flex';
+    } else {
+        phoneEl.textContent = phone || '-';
+        waBtn.style.display = 'none';
     }
 
-    // Revenue Chart
-    const revCtx = document.getElementById('revenueChart')?.getContext('2d');
-    if (revCtx) {
-        new Chart(revCtx, {
-            type: 'bar',
-            data: {
-                labels: {!! json_encode($revenueData->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'))) !!},
-                datasets: [{
-                    label: 'Pendapatan (Rp)',
-                    data: {!! json_encode($revenueData->pluck('total')) !!},
-                    backgroundColor: '#16a34a',
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                }
-            }
-        });
+    const badge = document.getElementById('modalStatusBadge');
+    if (resStatus === 'confirmed') {
+        badge.className = 'badge bg-success-subtle text-success border border-success-subtle py-1.5 px-2.5 fw-semibold';
+        badge.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Lunas / Terkonfirmasi';
+    } else {
+        badge.className = 'badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1.5 px-2.5 fw-semibold';
+        badge.innerHTML = '<i class="bi bi-clock-history me-1"></i> Menunggu Bayar WA';
     }
+
+    const notesContainer = document.getElementById('modalNotesContainer');
+    const notesEl = document.getElementById('modalNotes');
+    if (notes && notes.trim() !== '') {
+        notesContainer.style.display = 'block';
+        notesEl.textContent = notes;
+    } else {
+        notesContainer.style.display = 'none';
+    }
+
+    document.getElementById('modalTicketBtn').href = '/reservations/' + resId + '/ticket?code=' + code;
+
+    var detailModal = new bootstrap.Modal(document.getElementById('slotDetailModal'));
+    detailModal.show();
+}
 </script>
 @endpush
 @endsection
