@@ -1,297 +1,232 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Reservasi')
+@section('title', 'Rincian & Pembayaran Booking #' . $reservation->code)
 
 @section('content')
-<div class="container">
+<div class="container py-3">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <i class="bi bi-calendar-check"></i> Detail Reservasi
-                </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <p><strong>Lapangan:</strong> {{ $reservation->field->name }}</p>
-                            <p><strong>Pelanggan:</strong> {{ $reservation->user->name }}</p>
-                            <p><strong>Tanggal:</strong> {{ $reservation->reservation_date->format('d M Y') }}</p>
+        <div class="col-lg-8 col-xl-7">
+
+            <!-- Navigasi Atas Sederhana (Hanya Kembali ke Beranda) -->
+            <div class="mb-3">
+                <a href="{{ route('home') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Kembali ke Beranda
+                </a>
+            </div>
+
+            <!-- Stepper Ringkas (Langkah 3: Bayar via WhatsApp) -->
+            <div class="card border-0 mb-4 shadow-sm" style="background: #F0FDF4; border: 1px solid #DCFCE7 !important;">
+                <div class="card-body py-2.5 px-4">
+                    <div class="row text-center g-2 align-items-center">
+                        <div class="col-4 text-muted small">
+                            <i class="bi bi-check-circle-fill text-success me-1"></i> 1. Jadwal
                         </div>
-                        <div class="col-md-6">
-                            <p><strong>Jam:</strong> {{ $reservation->start_time }} - {{ $reservation->end_time }}</p>
-                            <p><strong>Durasi:</strong> {{ $reservation->duration_hours }} jam</p>
-                            <p>
-                                <strong>Status:</strong> 
-                                <span class="badge bg-{{ $reservation->status === 'confirmed' ? 'success' : ($reservation->status === 'pending' ? 'warning' : 'secondary') }}">
-                                    {{ ucfirst($reservation->status) }}
-                                </span>
-                            </p>
+                        <div class="col-4 text-muted small border-start border-end">
+                            <i class="bi bi-check-circle-fill text-success me-1"></i> 2. Data Diri
                         </div>
-                    </div>
-
-                    <div class="alert alert-info">
-                        <strong>Harga Total:</strong> Rp {{ number_format($reservation->total_price, 0, ',', '.') }}
-                    </div>
-
-                    @if($reservation->notes)
-                        <div class="alert alert-secondary">
-                            <strong>Catatan:</strong><br>
-                            {{ $reservation->notes }}
-                        </div>
-                    @endif
-
-                    @if($reservation->transaction)
-                        <div class="alert alert-success" style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #86efac;">
-                            <strong>Transaksi:</strong> {{ $reservation->transaction->transaction_code }}<br>
-                            <strong>Status Pembayaran:</strong> {{ ucfirst($reservation->transaction->status) }}<br>
-                            <strong>Tanggal Bayar:</strong> {{ $reservation->transaction->payment_date?->format('d M Y H:i') ?? '-' }}
-                        </div>
-                    @endif
-
-                    @php $transaction = $reservation->transaction; @endphp
-
-                    <!-- Tombol Cetak Struk / Tiket Booking -->
-                    <div class="mb-4">
-                        <a href="{{ route('reservations.ticket', $reservation->id) }}" class="btn btn-success btn-lg w-100 fw-bold shadow d-flex align-items-center justify-content-center gap-2" style="border-radius: 14px; background: linear-gradient(135deg, #16a34a, #22c55e); border: none;">
-                            <i class="bi bi-printer-fill fs-5"></i> Cetak Struk / Tiket Booking
-                        </a>
-                    </div>
-
-                    <!-- Upload Bukti Pembayaran -->
-                    <div class="card p-4 mb-4" style="background: #0b172a; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 18px;">
-                        <h5 class="card-title text-white fw-bold mb-3">
-                            <i class="bi bi-cloud-arrow-up-fill text-success me-2"></i> Bukti Pembayaran Transfer / QRIS
-                        </h5>
-
-                        @if($transaction && $transaction->payment_proof)
-                            <div class="p-3 rounded-3 mb-3" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.25);">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Bukti Bayar Terunggah</span>
-                                    <small class="text-white-50">{{ $transaction->payment_proof_uploaded_at?->format('d M Y H:i') }}</small>
-                                </div>
-                                <div class="d-flex align-items-center gap-3">
-                                    <a href="{{ asset($transaction->payment_proof) }}" target="_blank">
-                                        <img src="{{ asset($transaction->payment_proof) }}" alt="Bukti Transfer" class="rounded border border-secondary" style="width: 70px; height: 70px; object-fit: cover;">
-                                    </a>
-                                    <div>
-                                        <strong class="text-white d-block">Bukti transfer Anda telah tersimpan</strong>
-                                        @if($transaction->status === 'paid' || $reservation->status === 'confirmed')
-                                            <span class="text-success small fw-semibold"><i class="bi bi-check2-all"></i> Pembayaran telah diverifikasi & disetujui admin!</span>
-                                        @else
-                                            <span class="text-warning small fw-semibold"><i class="bi bi-hourglass-split"></i> Sedang menunggu verifikasi oleh admin.</span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        @if($reservation->status !== 'cancelled' && (!$transaction || $transaction->status !== 'paid'))
-                            <form action="{{ route('reservations.upload_proof', $reservation->id) }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <div class="mb-3">
-                                    <label for="payment_proof" class="form-label text-white small fw-semibold">
-                                        {{ ($transaction && $transaction->payment_proof) ? 'Ganti / Unggah Ulang Bukti Pembayaran:' : 'Pilih Foto Bukti Transfer / Pembayaran:' }}
-                                    </label>
-                                    <input type="file" name="payment_proof" id="payment_proof" class="form-control" accept="image/*,.pdf" required>
-                                    <small class="text-white-50 d-block mt-1">Format: JPG, PNG, atau PDF (Maksimal 5MB).</small>
-                                </div>
-                                <button type="submit" class="btn btn-primary fw-bold w-100 py-2 d-flex align-items-center justify-content-center gap-2" style="border-radius: 10px;">
-                                    <i class="bi bi-upload"></i> Kirim Bukti Pembayaran
-                                </button>
-                            </form>
-                        @endif
-                    </div>
-
-                    <div class="d-grid gap-2">
-                        @php $transaction = $reservation->transaction; @endphp
-
-                        @if($reservation->status !== 'cancelled')
-                            @if($transaction && $transaction->status !== 'paid' && $transaction->status !== 'completed')
-                                <div class="d-flex flex-column flex-md-row gap-2">
-                                    <a href="{{ route('payments.qris', $transaction->id) }}" class="btn btn-primary d-flex align-items-center justify-content-center gap-2">
-                                        <i class="bi bi-qr-code"></i> Bayar QRIS
-                                    </a>
-                                    <a href="{{ route('payments.ewallet', $transaction->id) }}" class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2">
-                                        <i class="bi bi-wallet2"></i> Bayar E-Wallet
-                                    </a>
-                                </div>
-                            @elseif($transaction && $transaction->status === 'paid')
-                                <div class="d-flex flex-column flex-md-row gap-2">
-                                    <a href="{{ route('transactions.invoice', $transaction->id) }}" class="btn btn-success d-flex align-items-center justify-content-center gap-2">
-                                        <i class="bi bi-file-earmark-text"></i> Lihat Invoice
-                                    </a>
-                                    <a href="{{ route('transactions.pdf', $transaction->id) }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2">
-                                        <i class="bi bi-download"></i> Unduh PDF
-                                    </a>
-                                </div>
-                            @elseif(!$transaction && in_array($reservation->status, ['pending', 'confirmed']))
-                                <button id="create-transaction-btn" type="button" class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2" data-reservation-id="{{ $reservation->id }}">
-                                    <i class="bi bi-credit-card-2-front"></i> Buat Transaksi & Bayar
-                                </button>
+                        <div class="col-4">
+                            @if(in_array(strtolower($reservation->status), ['paid', 'lunas', 'confirmed', 'dp']) || ($reservation->transaction && in_array(strtolower($reservation->transaction->status), ['paid', 'completed'])))
+                                <strong class="text-success small"><i class="bi bi-check-circle-fill me-1"></i> 3. Lunas &amp; Terkonfirmasi</strong>
+                            @else
+                                <strong class="text-success small"><i class="bi bi-record-circle me-1"></i> 3. Bayar via WA</strong>
                             @endif
-
-                            @if($transaction && $transaction->status === 'pending')
-                                <a href="{{ route('transactions.show', $transaction->id) }}" class="btn btn-outline-info d-flex align-items-center justify-content-center gap-2">
-                                    <i class="bi bi-info-circle"></i> Cek Status Pembayaran
-                                </a>
-                            @endif
-
-                            <button type="button" class="btn btn-danger d-flex align-items-center justify-content-center gap-2 btn-open-cancel-modal"
-                                data-reservation-id="{{ $reservation->id }}"
-                                data-field-name="{{ $reservation->field->name }}"
-                                data-date="{{ $reservation->reservation_date->format('d M Y') }}"
-                                data-time="{{ $reservation->start_time }} - {{ $reservation->end_time }}">
-                                <i class="bi bi-x-circle"></i> Batalkan Reservasi
-                            </button>
-                        @endif
-
-                        <a href="{{ route('customer.reservations') }}" class="btn btn-secondary d-flex align-items-center justify-content-center gap-2">
-                            <i class="bi bi-arrow-left"></i> Kembali
-                        </a>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            @php
+                $transaction = $reservation->transaction;
+                $isPaid = (in_array(strtolower($reservation->status), ['paid', 'lunas', 'confirmed', 'dp']) || ($transaction && in_array(strtolower($transaction->status), ['paid', 'completed'])));
+                $customerName = $reservation->customer_name ?: ($reservation->user->name ?? 'Pelanggan');
+                $customerPhone = $reservation->customer_phone ?: ($reservation->user->phone ?? '-');
+
+                // Format Tanggal Bahasa Indonesia (contoh: "Rabu, 25 November 2026")
+                $indoDays = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                $indoMonths = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                $carbonDate = \Carbon\Carbon::parse($reservation->reservation_date);
+                $indoDateFormatted = $indoDays[$carbonDate->dayOfWeek] . ', ' . $carbonDate->day . ' ' . $indoMonths[$carbonDate->month] . ' ' . $carbonDate->year;
+
+                $jamFormatted = \Carbon\Carbon::parse($reservation->start_time)->format('H:i') . ' - ' . \Carbon\Carbon::parse($reservation->end_time)->format('H:i') . ' WIB';
+                $totalFormatted = 'Rp ' . number_format($reservation->total_price, 0, ',', '.');
+
+                // Susunan Teks Otomatis WhatsApp Resmi Admin
+                if (!$isPaid && $reservation->status !== 'cancelled') {
+                    $waText = "Halo Admin SM Sport Center, saya ingin melakukan pembayaran booking lapangan:\n"
+                            . "- Kode Booking: " . $reservation->code . "\n"
+                            . "- Nama: " . $customerName . "\n"
+                            . "- Lapangan: " . $reservation->field->name . "\n"
+                            . "- Jadwal: " . $indoDateFormatted . ", " . $jamFormatted . "\n"
+                            . "- Total Bayar: " . $totalFormatted . "\n"
+                            . "Mohon info rekening / QRIS untuk pembayarannya. Terima kasih.";
+                } else {
+                    $waText = "Halo Admin SM Sport Center, saya ingin konfirmasi pesanan lapangan saya:\n"
+                            . "- Kode Booking: " . $reservation->code . "\n"
+                            . "- Nama: " . $customerName . "\n"
+                            . "- Lapangan: " . $reservation->field->name . "\n"
+                            . "- Jadwal: " . $indoDateFormatted . ", " . $jamFormatted . "\n"
+                            . "- Status: " . ($isPaid ? 'LUNAS / TERKONFIRMASI' : ucfirst($reservation->status)) . "\n"
+                            . "Terima kasih.";
+                }
+
+                $waUrl = "https://wa.me/6281384665386?text=" . urlencode($waText);
+            @endphp
+
+            <!-- KARTU UTAMA: RINGKASAN PESANAN BERSIH & JELAS -->
+            <div class="card mb-3 shadow-sm border bg-white">
+                <div class="card-header bg-white border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <div>
+                            <small class="text-muted text-uppercase d-block" style="font-size: 0.72rem; letter-spacing: 0.5px;">KODE BOOKING</small>
+                            <span class="fs-5 fw-bold font-monospace text-dark" id="bookingCodeVal">{{ $reservation->code }}</span>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm py-0.5 px-2 mt-2" onclick="copyBookingCode()" title="Salin Kode Booking">
+                            <i class="bi bi-clipboard" id="copyIcon"></i> <span id="copyLabel" style="font-size: 0.75rem;">Salin</span>
+                        </button>
+                    </div>
+
+                    <div>
+                        @if($isPaid)
+                            <span class="badge bg-success text-white py-1.5 px-3 fs-6">
+                                <i class="bi bi-patch-check-fill me-1"></i> Lunas / Terkonfirmasi
+                            </span>
+                        @elseif($reservation->status === 'cancelled')
+                            <span class="badge bg-danger-subtle text-danger border border-danger py-1.5 px-2.5">
+                                <i class="bi bi-x-circle me-1"></i> Dibatalkan
+                            </span>
+                        @else
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1.5 px-2.5">
+                                <i class="bi bi-clock-history me-1"></i> Menunggu Pembayaran via WhatsApp
+                            </span>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="row g-3 pb-3 mb-3 border-bottom">
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block mb-0.5">Nama Lapangan</small>
+                            <strong class="text-dark fs-6">{{ $reservation->field->name }}</strong>
+                            <span class="badge bg-light text-dark border ms-1">{{ ucfirst($reservation->field->type) }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block mb-0.5">Nama Pemesan</small>
+                            <strong class="text-dark">{{ $customerName }}</strong>
+                            <div class="small text-muted">{{ $customerPhone }}</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block mb-0.5">Tanggal Bermain</small>
+                            <strong class="text-dark">{{ $indoDateFormatted }}</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block mb-0.5">Waktu & Durasi</small>
+                            <strong class="text-dark">{{ $jamFormatted }}</strong>
+                            <span class="text-muted small">({{ $reservation->duration_hours }} Jam)</span>
+                        </div>
+                    </div>
+
+                    @if($reservation->notes)
+                        <div class="p-2.5 bg-light rounded border mb-3 small">
+                            <strong class="text-dark"><i class="bi bi-chat-left-text text-muted me-1"></i> Catatan:</strong>
+                            <span class="text-muted ms-1">{{ $reservation->notes }}</span>
+                        </div>
+                    @endif
+
+                    <!-- Kotak Total Biaya -->
+                    <div class="p-3 rounded border mb-0 d-flex justify-content-between align-items-center" style="background-color: #F0FDF4; border-color: #BBF7D0 !important;">
+                        <div>
+                            <span class="text-muted small d-block">Tarif: Rp {{ number_format($reservation->field->price_per_hour, 0, ',', '.') }} × {{ $reservation->duration_hours }} Jam</span>
+                            <strong class="text-dark fs-6">{{ $isPaid ? 'Total Dibayarkan (Lunas):' : 'Total yang Harus Dibayar:' }}</strong>
+                        </div>
+                        <span class="fs-4 fw-bold text-success">{{ $totalFormatted }}</span>
+                    </div>
+                </div>
+            </div>
+
+            @if(!$isPaid && $reservation->status !== 'cancelled')
+                <!-- KOTAK PANDUAN SINGKAT PEMBAYARAN VIA WHATSAPP -->
+                <div class="card border-0 mb-4 shadow-sm" style="background: #F0FDF4; border: 1px solid #BBF7D0 !important;">
+                    <div class="card-body p-3.5">
+                        <div class="d-flex align-items-start gap-2.5">
+                            <i class="bi bi-info-circle-fill text-success fs-5 mt-0.5"></i>
+                            <div>
+                                <strong class="text-dark small d-block mb-1">Cara Pembayaran:</strong>
+                                <p class="text-muted small mb-0" style="line-height: 1.55;">
+                                    Klik tombol hijau di bawah untuk mengirim rincian booking ke WhatsApp Admin. Admin akan mengirimkan nomor rekening / QRIS dan mengonfirmasi jadwal Anda setelah pembayaran diterima.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- TOMBOL UTAMA KIRIM KE WHATSAPP ADMIN (AUTO-TEXT) -->
+            <div class="d-flex flex-column gap-2 mb-4">
+                <a href="{{ $waUrl }}" target="_blank" rel="noopener noreferrer" 
+                   class="btn btn-success w-100 py-3 fw-bold shadow d-flex align-items-center justify-content-center gap-2" 
+                   style="font-size: 1.05rem; border-radius: 10px;">
+                    <i class="bi bi-whatsapp fs-4"></i>
+                    <span>{{ $isPaid ? 'Hubungi Admin via WhatsApp (0813-8466-5386)' : 'Kirim & Bayar via WhatsApp Admin (0813-8466-5386)' }}</span>
+                </a>
+
+                @if($isPaid)
+                    <!-- Tombol Aksi Tambahan Bersih di Bawah (Hanya Tampil Setelah Disetujui / Lunas oleh Admin) -->
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <a href="{{ route('reservations.ticket', $reservation->id) }}?code={{ $reservation->code }}" target="_blank" class="btn btn-outline-secondary flex-grow-1 py-2">
+                            <i class="bi bi-printer me-1"></i> Cetak / Simpan Bukti
+                        </a>
+                        <a href="{{ route('reservations.check') }}" class="btn btn-outline-secondary flex-grow-1 py-2">
+                            <i class="bi bi-search me-1"></i> Cek Status Pesanan
+                        </a>
+                    </div>
+                @endif
+            </div>
+
         </div>
     </div>
 </div>
+
+@push('scripts')
 <script>
-    document.getElementById('create-transaction-btn')?.addEventListener('click', async function () {
-        const button = this;
-        const originalHtml = button.innerHTML;
+function copyBookingCode() {
+    const codeEl = document.getElementById('bookingCodeVal');
+    if (!codeEl) return;
+    const code = codeEl.innerText.trim();
+    copyText(code, document.getElementById('copyLabel'));
+}
 
-        button.disabled = true;
-        button.innerHTML = '<span class="me-2"><i class="bi bi-arrow-repeat"></i></span>Memproses...';
-
-        try {
-            const response = await fetch(`/reservations/${button.dataset.reservationId}/transaction`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({})
-            });
-
-            const data = await response.json();
-            if (!response.ok || !data.ok) {
-                throw new Error(data?.message || 'Gagal membuat transaksi. Silakan coba lagi.');
-            }
-
-            if (!data.transaction_id) {
-                throw new Error('ID transaksi tidak ditemukan dari server.');
-            }
-
-            window.location.href = `/payments/qris/${data.transaction_id}`;
-        } catch (error) {
-            console.error(error);
-            Swal.fire('Error', error.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
-            button.disabled = false;
-            button.innerHTML = originalHtml;
+function copyText(text, btnEl) {
+    const onSuccess = () => {
+        if (btnEl) {
+            const originalText = btnEl.innerText;
+            btnEl.innerText = 'Tersalin!';
+            setTimeout(() => { btnEl.innerText = originalText; }, 2000);
         }
-    });
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(onSuccess).catch(() => fallbackCopy(text, onSuccess));
+    } else {
+        fallbackCopy(text, onSuccess);
+    }
+}
+
+function fallbackCopy(text, callback) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        if (callback) callback();
+    } catch (err) {
+        console.error('Fallback copy failed', err);
+    }
+    document.body.removeChild(textArea);
+}
 </script>
-
+@endpush
 @endsection
-
-@if(session('show_payment_modal'))
-    @push('scripts')
-    <script>
-        // Payment buttons: ensure transaction exists then redirect
-        async function ensureTransactionAndRedirect(reservationId, type) {
-            try {
-                const res = await fetch(`/reservations/${reservationId}/transaction`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({})
-                });
-
-                const data = await res.json();
-                if (!res.ok || !data.ok) {
-                    const message = data?.message || 'Gagal membuat transaksi. Silakan coba lagi.';
-                    console.error('createTransaction error', data);
-                    Swal.fire('Error', message, 'error');
-                    return;
-                }
-
-                const txId = data.transaction_id;
-                if (!txId) {
-                    Swal.fire('Error', 'ID transaksi tidak ditemukan dari server.', 'error');
-                    return;
-                }
-
-                if (type === 'qris') {
-                    window.location.href = `/payments/qris/${txId}`;
-                } else {
-                    window.location.href = `/payments/ewallet/${txId}`;
-                }
-            } catch (err) {
-                console.error(err);
-                Swal.fire('Error', 'Terjadi kesalahan jaringan. Silakan coba lagi.', 'error');
-            }
-        }
-
-        document.getElementById('pay-qris-btn')?.addEventListener('click', function() {
-            const id = this.dataset.reservationId;
-            ensureTransactionAndRedirect(id, 'qris');
-        });
-
-        document.getElementById('pay-ewallet-btn')?.addEventListener('click', function() {
-            const id = this.dataset.reservationId;
-            ensureTransactionAndRedirect(id, 'ewallet');
-        });
-        document.addEventListener('DOMContentLoaded', function() {
-            Swal.fire({
-                title: '<strong>Reservasi Berhasil!</strong>',
-                html: `
-                    <div class="swal-payment-box">
-                        <div>
-                            <img src="/images/qris-logo.svg" class="swal-payment-img" alt="QRIS Logo" />
-                        </div>
-                        <div class="swal-payment-body">
-                            <div class="swal-payment-header">Lapangan: {{ $reservation->field->name }}</div>
-                            <div class="swal-payment-detail">{{ $reservation->reservation_date->format('d M Y') }} • {{ $reservation->start_time }} - {{ $reservation->end_time }}</div>
-                            <div class="swal-payment-total"><strong>Rp {{ number_format($reservation->total_price,0,',','.') }}</strong></div>
-                        </div>
-                    </div>
-                    <div class="swal-payment-detail mt-3">Pilih metode pembayaran:</div>
-                    <div class="swal-payment-methods">
-                        <button id="pay-qris" class="btn swal-payment-btn swal-payment-btn-primary"><i class="bi bi-qr-code me-2"></i> Bayar (QRIS)</button>
-                        <button id="pay-ewallet" class="btn swal-payment-btn swal-payment-btn-secondary"><img src="/images/gopay.png" class="swal-payment-option-icon" alt="GoPay" /> Bayar (E-Wallet)</button>
-                    </div>
-                `,
-                showConfirmButton: false,
-                showCancelButton: true,
-                cancelButtonText: 'Nanti',
-                cancelButtonColor: '#6c757d',
-                allowOutsideClick: false,
-                width: 680,
-                padding: '1.4rem',
-                backdrop: true,
-                customClass: {
-                    popup: 'swal-custom-popup',
-                    title: 'swal-custom-title',
-                    content: 'swal-custom-content',
-                    cancelButton: 'swal-cancel-btn'
-                },
-                didOpen: () => {
-                    const popup = Swal.getPopup();
-                    popup.classList.add('swal-animate');
-
-                    document.getElementById('pay-qris').addEventListener('click', function() {
-                        window.location.href = '{{ route('payments.qris', session('show_payment_modal')) }}';
-                    });
-
-                    document.getElementById('pay-ewallet').addEventListener('click', function() {
-                        window.location.href = '{{ route('payments.ewallet', session('show_payment_modal')) }}';
-                    });
-                }
-            });
-        });
-    </script>
-    @endpush
-@endif

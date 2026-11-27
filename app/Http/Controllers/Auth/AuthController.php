@@ -64,14 +64,14 @@ class AuthController extends Controller
 
             // Redirect based on role
             if ($user->role === 'admin') {
-                return redirect()->route('admin.dashboard');
+                return redirect()->intended(route('admin.dashboard'));
             }
 
-            return redirect()->route('dashboard');
+            return redirect()->intended(route('dashboard'));
         }
 
-        return back()->withErrors([
-            'email' => 'Email atau password tidak sesuai',
+        return back()->withInput($request->only('email', 'remember'))->withErrors([
+            'email' => 'Email atau password yang Anda masukkan salah. Silakan periksa kembali.',
         ]);
     }
 
@@ -118,6 +118,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success', 'Logout berhasil');
+        return redirect()->route('login')->with('success', 'Anda telah berhasil logout dari sistem.');
     }
 }

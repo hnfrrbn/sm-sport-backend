@@ -35,7 +35,7 @@ class Field extends Model
     public function activeReservations(): HasMany
     {
         return $this->hasMany(Reservation::class)
-            ->whereIn('status', ['pending', 'confirmed']);
+            ->whereIn('status', ['paid', 'lunas', 'confirmed', 'dp']);
     }
 
     /**
@@ -75,7 +75,7 @@ class Field extends Model
     public function isAvailable(\DateTime $startTime, \DateTime $endTime, ?int $excludeReservationId = null): bool
     {
         $query = $this->reservations()
-            ->whereIn('status', ['pending', 'confirmed'])
+            ->whereIn('status', ['paid', 'lunas', 'confirmed', 'dp'])
             ->whereDate('reservation_date', $startTime->format('Y-m-d'))
             ->where(function ($q) use ($startTime, $endTime) {
                 $q->whereBetween('start_time', [$startTime->format('H:i:s'), $endTime->format('H:i:s')])

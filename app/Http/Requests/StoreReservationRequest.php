@@ -24,6 +24,9 @@ class StoreReservationRequest extends FormRequest
             'reservation_date' => ['required', 'date', 'after_or_equal:today'],
             'start_time' => ['required', 'date_format:H:i'],
             'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
+            'customer_name' => ['nullable', 'string', 'max:100'],
+            'customer_phone' => ['nullable', 'string', 'max:25'],
+            'payment_method' => ['nullable', 'string', 'in:whatsapp,transfer,qris'],
             'notes' => ['nullable', 'string', 'max:500'],
         ];
     }
@@ -31,13 +34,13 @@ class StoreReservationRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'field_id.required' => 'Lapangan harus dipilih',
-            'field_id.exists' => 'Lapangan tidak ditemukan',
-            'reservation_date.required' => 'Tanggal reservasi harus diisi',
-            'reservation_date.after_or_equal' => 'Tanggal reservasi harus hari ini atau setelah hari ini',
-            'start_time.required' => 'Jam mulai harus diisi',
-            'end_time.required' => 'Jam selesai harus diisi',
-            'end_time.after' => 'Jam selesai harus setelah jam mulai',
+            'field_id.required' => 'Lapangan harus dipilih.',
+            'field_id.exists' => 'Lapangan tidak ditemukan.',
+            'reservation_date.required' => 'Tanggal bermain harus diisi.',
+            'reservation_date.after_or_equal' => 'Tanggal bermain minimal hari ini.',
+            'start_time.required' => 'Jam mulai bermain harus dipilih.',
+            'end_time.required' => 'Jam selesai bermain harus dipilih.',
+            'end_time.after' => 'Jam selesai harus lebih besar dari jam mulai.',
         ];
     }
 }
