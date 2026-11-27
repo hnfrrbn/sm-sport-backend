@@ -21,8 +21,8 @@
             <div class="card shadow-sm border p-4 p-md-5 bg-white">
                 <!-- Header Struk -->
                 <div class="text-center pb-3 border-bottom mb-4">
-                    <div class="brand-badge mx-auto mb-2" style="width: 44px; height: 44px;">
-                        <i class="bi bi-dribbble text-success"></i>
+                    <div class="brand-monogram mx-auto mb-2" style="width: 44px; height: 44px; font-size: 1.15rem; border-radius: 11px;">
+                        SM
                     </div>
                     <h4 class="fw-bold mb-1 text-dark">SM SPORT CENTER</h4>
                     <p class="text-muted small mb-1">Jati Padang, RT/RW 006/003, Pasar Minggu, Jakarta Selatan • WA: 0813-8466-5386</p>
@@ -32,7 +32,7 @@
                 <!-- Status & Kode Booking -->
                 @php 
                     $tTrx = $reservation->transaction; 
-                    $isLunas = ($reservation->status === 'confirmed' || ($tTrx && in_array($tTrx->status, ['paid', 'completed'])));
+                    $isLunas = (in_array(strtolower($reservation->status), ['paid', 'lunas', 'confirmed', 'dp']) || ($tTrx && in_array(strtolower($tTrx->status), ['paid', 'completed'])));
                     $custName = $reservation->customer_name ?: ($reservation->user->name ?? 'Pelanggan');
                     $custPhone = $reservation->customer_phone ?: ($reservation->user->phone ?? '-');
                 @endphp

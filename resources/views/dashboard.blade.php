@@ -123,7 +123,7 @@
                                 <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
                                     <span class="badge text-uppercase fw-bold px-3 py-2 shadow-sm rounded-pill" 
                                           style="backdrop-filter: blur(8px); background: rgba(0, 0, 0, 0.4); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2);">
-                                        <i class="bi {{ strtolower($field->type) === 'badminton' ? 'bi-feather text-info' : 'bi-dribbble text-success' }} me-1"></i>
+                                        <i class="bi {{ strtolower($field->type) === 'badminton' ? 'bi-feather text-info' : 'bi-trophy text-success' }} me-1"></i>
                                         {{ $field->type }}
                                     </span>
                                 </div>

@@ -3,138 +3,111 @@
 @section('title', 'SM Sport Center - Booking Lapangan Futsal & Badminton')
 
 @section('content')
-<div class="container py-3">
+<div class="container py-4 py-md-5">
 
-    <!-- 1. HEADER PROFIL VENUE AYO (RINGKAS & PADAT TANPA GAMBAR/BANNER BESAR) -->
-    <div class="card border bg-white shadow-sm p-3 p-md-4 mb-4">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+    <!-- 1. HEADER VENUE LEGA & RAPI (TANPA IKON BOLA BASKET) -->
+    <div class="card border bg-white shadow-sm p-4 p-sm-5 mb-4 mb-md-5 rounded-4" style="border-color: var(--border-subtle) !important;">
+        <div class="d-flex flex-column gap-3">
             <div>
-                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                    <h1 class="h3 fw-bold text-dark mb-0">SM Sport Center</h1>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.72rem;">
-                        <i class="bi bi-patch-check-fill me-1"></i> Venue Resmi
-                    </span>
-                </div>
-                
-                <div class="text-muted small mb-2 d-flex flex-wrap align-items-center gap-2">
+                <h1 class="h3 fw-bold text-dark mb-2 tracking-tight">Booking Lapangan SM Sport Center</h1>
+                <div class="text-muted d-flex flex-wrap align-items-center gap-2" style="font-size: 0.9rem;">
                     <span>
-                        <i class="bi bi-geo-alt-fill text-danger me-1"></i> Jati Padang, RT/RW 006/003, Pasar Minggu, Jakarta Selatan
+                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>Jati Padang, Pasar Minggu, Jakarta Selatan
                     </span>
                     <span class="text-secondary d-none d-sm-inline">•</span>
                     <span>
-                        <i class="bi bi-clock-fill text-success me-1"></i> Buka Setiap Hari: <strong>08:00 - 23:00 WIB</strong>
-                    </span>
-                </div>
-
-                <!-- Badge Fasilitas Venue Sederhana -->
-                <div class="d-flex flex-wrap gap-1.5 align-items-center">
-                    <span class="badge bg-light text-secondary border fw-normal py-1 px-2">
-                        <i class="bi bi-p-circle text-primary me-1"></i> Parkir Gratis
-                    </span>
-                    <span class="badge bg-light text-secondary border fw-normal py-1 px-2">
-                        <i class="bi bi-droplet-fill text-info me-1"></i> Toilet & Ruang Ganti
-                    </span>
-                    <span class="badge bg-light text-secondary border fw-normal py-1 px-2">
-                        <i class="bi bi-moon-stars-fill text-success me-1"></i> Mushola
-                    </span>
-                    <span class="badge bg-light text-secondary border fw-normal py-1 px-2">
-                        <i class="bi bi-cup-hot-fill text-warning me-1"></i> Kantin & Air Minum
+                        <i class="bi bi-clock-fill text-success me-1"></i>Buka Setiap Hari: <strong>08:00 - 23:00 WIB</strong>
                     </span>
                 </div>
             </div>
 
-            <!-- Tombol Aksi Cepat Header -->
-            <div class="w-100 w-md-auto mt-2 mt-md-0">
-                <a href="https://wa.me/6281384665386?text={{ urlencode('Halo Admin SM Sport Center Pasar Minggu, saya ingin tanya info ketersediaan lapangan.') }}" 
-                   target="_blank" rel="noopener noreferrer" class="btn btn-outline-success btn-sm px-3 w-100 w-md-auto">
-                    <i class="bi bi-whatsapp me-1"></i> Hubungi Admin
-                </a>
+            <!-- Pemisah & Info Fasilitas Lega -->
+            <div class="pt-3 border-top d-flex flex-wrap align-items-center gap-2 text-muted" style="font-size: 0.825rem; border-color: #F1F5F9 !important;">
+                <span class="fw-semibold text-dark"><i class="bi bi-check-circle-fill text-success me-1"></i>Fasilitas:</span>
+                <span>Parkir Gratis</span>
+                <span class="text-secondary">•</span>
+                <span>Toilet & Ruang Ganti</span>
+                <span class="text-secondary">•</span>
+                <span>Mushola</span>
+                <span class="text-secondary">•</span>
+                <span>Kantin</span>
             </div>
         </div>
     </div>
 
-    <!-- 2. TAB FILTER KATEGORI LAPANGAN ALA AYO -->
-    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3 pb-2 border-bottom">
+    <!-- 2. TAB FILTER KATEGORI & TOMBOL AKSES CEPAT CEK PESANAN -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom" id="daftar-lapangan">
         <div>
-            <h2 class="h5 fw-bold text-dark mb-0">Daftar Lapangan Olahraga</h2>
-            <small class="text-muted">Pilih lapangan untuk melihat jadwal jam yang tersedia</small>
+            <h2 class="h5 fw-bold text-dark mb-1">Pilih Lapangan Olahraga</h2>
+            <p class="text-muted small mb-0">Silakan pilih lapangan untuk mengecek ketersediaan jam bermain & booking online.</p>
         </div>
-        <!-- Filter Tabs Sederhana -->
-        <div class="btn-group p-1 bg-white border rounded-3 shadow-sm" role="group" aria-label="Filter Lapangan">
-            <button type="button" class="btn btn-sm btn-filter px-3 active" data-filter="all">
-                Semua ({{ $fields->count() }})
-            </button>
-            <button type="button" class="btn btn-sm btn-filter px-3" data-filter="futsal">
-                Futsal ({{ $fields->filter(fn($f) => strtolower($f->type) === 'futsal')->count() }})
-            </button>
-            <button type="button" class="btn btn-sm btn-filter px-3" data-filter="badminton">
-                Badminton ({{ $fields->filter(fn($f) => strtolower($f->type) === 'badminton')->count() }})
-            </button>
+        
+        <div class="d-flex flex-wrap align-items-center gap-2 mt-2 mt-md-0">
+            <!-- Filter Tabs Kategori -->
+            <div class="btn-group p-1 bg-white border rounded-3 shadow-sm" role="group" aria-label="Filter Lapangan">
+                <button type="button" class="btn btn-sm btn-filter px-3 py-1.5 active" data-filter="all">
+                    Semua ({{ $fields->count() }})
+                </button>
+                <button type="button" class="btn btn-sm btn-filter px-3 py-1.5" data-filter="futsal">
+                    Futsal ({{ $fields->filter(fn($f) => strtolower($f->type) === 'futsal')->count() }})
+                </button>
+                <button type="button" class="btn btn-sm btn-filter px-3 py-1.5" data-filter="badminton">
+                    Badminton ({{ $fields->filter(fn($f) => strtolower($f->type) === 'badminton')->count() }})
+                </button>
+            </div>
+
+            <!-- Tombol Ringan Cek Status Pesanan -->
+            <a href="{{ route('reservations.check') }}" class="btn btn-sm btn-outline-secondary px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm" title="Cek Status Pesanan Anda">
+                <i class="bi bi-search text-success"></i>
+                <span>Cek Status Pesanan</span>
+            </a>
         </div>
     </div>
 
-    <!-- 3. DAFTAR KARTU LAPANGAN (MURNI BERBASIS TEKS & INFORMASI TANPA GAMBAR DEKORATIF) -->
-    <div class="row g-3" id="fieldsContainer">
+    <!-- 3. DAFTAR KARTU LAPANGAN (GRID 3 KOLOM DESKTOP, LEGA & PROPORSIAL) -->
+    <div class="row g-4" id="fieldsContainer">
         @forelse($fields as $field)
             @php
                 $isBadminton = strtolower($field->type) === 'badminton';
                 $categoryName = $isBadminton ? 'Badminton' : 'Futsal';
-                $floorType = $isBadminton 
-                    ? 'Karpet Vinyl Standar BWF' 
-                    : (str_contains($field->name, '1') ? 'Interlock Vinyl FIFA' : 'Rumput Sintetis Premium');
-                $playerCap = $isBadminton ? '4 Pemain (Ganda / Tunggal)' : '10 Pemain (5 vs 5)';
+                $specSummary = $isBadminton 
+                    ? 'Karpet Vinyl Standar BWF • Ganda / Tunggal' 
+                    : (str_contains($field->name, '1') ? 'Interlock Vinyl FIFA • 10 Pemain' : 'Rumput Sintetis Premium • 10 Pemain');
             @endphp
             <div class="col-md-6 col-lg-4 field-card-item" data-category="{{ strtolower($field->type) }}">
-                <div class="card h-100 bg-white border shadow-sm p-3 d-flex flex-column justify-content-between">
+                <div class="card h-100 bg-white border shadow-sm rounded-3 d-flex flex-column justify-content-between hover-card" style="padding: 1.25rem !important;">
                     <div>
-                        <!-- Bagian Atas Kartu: Badge Kategori di Kiri & Jam Operasional di Kanan -->
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge {{ $isBadminton ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-success-subtle text-success border border-success-subtle' }} text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                        <!-- Baris Atas: Nama Lapangan & Badge Kategori -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h3 class="h6 fw-bold text-dark mb-0">{{ $field->name }}</h3>
+                            <span class="badge {{ $isBadminton ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-success-subtle text-success border border-success-subtle' }} text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">
                                 {{ $categoryName }}
-                            </span>
-                            <span class="small text-muted" style="font-size: 0.75rem;">
-                                <i class="bi bi-clock text-success me-1"></i> 08:00 - 23:00 WIB
                             </span>
                         </div>
 
-                        <!-- Bagian Tengah Kartu: Nama Lapangan Dicetak Tebal Besar, Jenis Lantai, Kapasitas -->
-                        <h3 class="h5 fw-bold text-dark mb-2">{{ $field->name }}</h3>
-                        
-                        <div class="small text-muted mb-3 d-flex flex-column gap-1.5">
-                            <div class="d-flex align-items-center">
-                                <span class="text-secondary" style="width: 80px;">Lantai:</span>
-                                <strong class="text-dark">{{ $floorType }}</strong>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="text-secondary" style="width: 80px;">Kapasitas:</span>
-                                <strong class="text-dark">{{ $playerCap }}</strong>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="text-secondary" style="width: 80px;">Status:</span>
-                                <span class="badge {{ $field->status === 'available' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }} py-0.5 px-1.5 fw-semibold" style="font-size: 0.72rem;">
-                                    <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>
-                                    {{ $field->status === 'available' ? 'Tersedia' : 'Maintenance' }}
-                                </span>
-                            </div>
+                        <!-- Baris Tengah: Ringkasan Spesifikasi 1 Baris -->
+                        <div class="text-muted small mb-3" style="font-size: 0.8rem;">
+                            <i class="bi bi-check2-circle text-success me-1"></i>{{ $specSummary }}
                         </div>
                     </div>
 
-                    <!-- Bagian Bawah Kartu: Tarif Sewa Tebal & Tombol Penuh "Pilih Jadwal" -->
-                    <div class="pt-3 border-top mt-2">
-                        <div class="d-flex justify-content-between align-items-baseline mb-3">
-                            <span class="text-muted small">Tarif Sewa:</span>
-                            <div>
-                                <span class="fs-4 fw-bolder text-success">Rp {{ number_format($field->price_per_hour, 0, ',', '.') }}</span>
-                                <span class="text-muted small">/ jam</span>
+                    <!-- Baris Bawah: Tarif Sewa Sejajar dengan Tombol "Pilih Jadwal" -->
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center gap-2">
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.72rem; line-height: 1;">Tarif Sewa</span>
+                            <div class="mt-0.5">
+                                <span class="fs-5 fw-bolder text-success">Rp {{ number_format($field->price_per_hour, 0, ',', '.') }}</span>
+                                <span class="text-muted small" style="font-size: 0.75rem;">/ jam</span>
                             </div>
                         </div>
 
                         @if($field->status === 'available')
-                            <a href="{{ route('reservations.create', ['field_id' => $field->id]) }}" class="btn btn-primary w-100 py-2.5 fw-bold shadow-sm">
-                                Pilih Jadwal
+                            <a href="{{ route('reservations.create', ['field_id' => $field->id]) }}" class="btn btn-primary btn-sm px-3 py-1.5 fw-bold shadow-sm d-inline-flex align-items-center gap-1">
+                                <span>Pilih Jadwal</span>
+                                <i class="bi bi-arrow-right"></i>
                             </a>
                         @else
-                            <button class="btn btn-secondary w-100 py-2.5 fw-semibold" disabled>
+                            <button class="btn btn-secondary btn-sm px-3 py-1.5 fw-semibold" disabled>
                                 Tidak Tersedia
                             </button>
                         @endif
@@ -157,6 +130,7 @@
     .btn-filter {
         border-radius: 6px;
         font-weight: 600;
+        font-size: 0.82rem;
         color: var(--text-muted);
         border: none;
         background: transparent;
@@ -169,6 +143,14 @@
     .btn-filter.active {
         background: var(--primary-emerald) !important;
         color: #FFFFFF !important;
+    }
+    .hover-card {
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .hover-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+        border-color: var(--primary-emerald) !important;
     }
 </style>
 @endpush

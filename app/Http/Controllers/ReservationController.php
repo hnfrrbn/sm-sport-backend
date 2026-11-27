@@ -74,14 +74,17 @@ class ReservationController extends Controller
     {
         try {
             $fieldId = $request->query('field_id', $request->input('field_id'));
-            $dateParam = $request->query('date', $request->input('date', date('Y-m-d')));
+            $dateParam = $request->query('date', $request->input('date'));
 
-            $dateString = date('Y-m-d');
+            $nowWib = Carbon::now('Asia/Jakarta');
+            $todayWibStr = $nowWib->toDateString();
+
+            $dateString = $todayWibStr;
             if ($dateParam) {
                 try {
-                    $dateString = Carbon::parse($dateParam)->toDateString();
+                    $dateString = Carbon::parse($dateParam, 'Asia/Jakarta')->toDateString();
                 } catch (\Throwable $e) {
-                    $dateString = date('Y-m-d');
+                    $dateString = $todayWibStr;
                 }
             }
 
@@ -96,17 +99,17 @@ class ReservationController extends Controller
             $slots = [];
             $startHour = 8;
             $endHour = 23;
-            $isToday = ($dateString === date('Y-m-d'));
-            $isPastDate = ($dateString < date('Y-m-d'));
-            $currentNow = Carbon::now('Asia/Jakarta');
-            $currentTimeStr = $currentNow->format('H:i');
+            $isToday = ($dateString === $todayWibStr);
+            $isPastDate = ($dateString < $todayWibStr);
+            $currentTimeStr = $nowWib->format('H:i');
 
-            // Retrieve all active reservations for this field and date
+            // Retrieve all active approved reservations for this field and date
+            // HANYA menganggap slot jam terisi (status: booked) apabila reservasi sudah disetujui / lunas oleh admin
             $activeReservations = collect();
             if ($field) {
                 $activeReservations = Reservation::where('field_id', $field->id)
                     ->whereDate('reservation_date', $dateString)
-                    ->whereIn('status', ['pending', 'confirmed'])
+                    ->whereIn('status', ['paid', 'lunas', 'confirmed', 'dp'])
                     ->get(['id', 'start_time', 'end_time', 'status']);
             }
 
@@ -116,21 +119,22 @@ class ReservationController extends Controller
 
                 $status = 'available';
 
+                $isBooked = $activeReservations->contains(function ($res) use ($slotStartStr, $slotEndStr) {
+                    $resStart = Carbon::parse($res->start_time)->format('H:i');
+                    $resEnd = Carbon::parse($res->end_time)->format('H:i');
+                    return $resStart < $slotEndStr && $resEnd > $slotStartStr;
+                });
+
                 if ($field && $field->status !== 'available') {
                     $status = 'maintenance';
+                } elseif ($isBooked) {
+                    // Slot terisi karena sudah disetujui / lunas oleh admin
+                    $status = 'booked';
                 } elseif ($isPastDate || ($isToday && $slotStartStr < $currentTimeStr)) {
                     // Jika hari ini dan jam mulai sudah lewat dari waktu sekarang (WIB) -> Lewat
                     $status = 'past';
                 } else {
-                    $isBooked = $activeReservations->contains(function ($res) use ($slotStartStr, $slotEndStr) {
-                        $resStart = Carbon::parse($res->start_time)->format('H:i');
-                        $resEnd = Carbon::parse($res->end_time)->format('H:i');
-                        return $resStart < $slotEndStr && $resEnd > $slotStartStr;
-                    });
-
-                    if ($isBooked) {
-                        $status = 'booked';
-                    }
+                    $status = 'available';
                 }
 
                 $slots[] = [
@@ -151,9 +155,11 @@ class ReservationController extends Controller
             \Illuminate\Support\Facades\Log::error('ReservationController::schedule error: ' . $e->getMessage());
 
             $fallbackSlots = [];
-            $fbIsToday = ($dateString === date('Y-m-d'));
-            $fbIsPastDate = ($dateString < date('Y-m-d'));
-            $fbNow = Carbon::now('Asia/Jakarta')->format('H:i');
+            $fbNowWib = Carbon::now('Asia/Jakarta');
+            $fbTodayStr = $fbNowWib->toDateString();
+            $fbIsToday = ($dateString === $fbTodayStr);
+            $fbIsPastDate = ($dateString < $fbTodayStr);
+            $fbNow = $fbNowWib->format('H:i');
 
             for ($hour = 8; $hour < 23; $hour++) {
                 $sStr = sprintf('%02d:00', $hour);
@@ -215,10 +221,11 @@ class ReservationController extends Controller
             return back()->withErrors(['field_id' => 'Lapangan yang dipilih tidak ditemukan.'])->withInput();
         }
 
-        // Anti Double Booking Validation (Consistent with schedule slots logic)
+        // Anti Double Booking Validation:
+        // HANYA berbenturan jika sudah ada reservasi yang disetujui / lunas oleh admin
         $conflictingReservation = Reservation::where('field_id', $field->id)
             ->whereDate('reservation_date', $validated['reservation_date'])
-            ->whereIn('status', ['pending', 'confirmed'])
+            ->whereIn('status', ['paid', 'lunas', 'confirmed', 'dp'])
             ->where(function ($q) use ($startTime, $endTime) {
                 $q->where(function ($sub) use ($startTime, $endTime) {
                     $sub->where('start_time', '<', $endTime->format('H:i:s'))
@@ -229,7 +236,7 @@ class ReservationController extends Controller
 
         if ($conflictingReservation) {
             return back()->withErrors([
-                'time_conflict' => 'Slot jam yang Anda pilih sudah terisi atau berbenturan dengan jadwal lain. Silakan pilih slot jam lain yang masih kosong.',
+                'time_conflict' => 'Slot jam yang Anda pilih sudah terisi atau berbenturan dengan jadwal lain yang telah disetujui. Silakan pilih slot jam lain yang masih kosong.',
             ])->withInput();
         }
 
@@ -363,6 +370,23 @@ class ReservationController extends Controller
 
         $oldStatus = $reservation->status;
         $newStatus = $validated['status'];
+
+        // Cek jika status disetujui (confirmed), pastikan tidak ada bentrok dengan reservasi lain yang sudah disetujui
+        if ($newStatus === 'confirmed') {
+            $conflict = Reservation::where('field_id', $reservation->field_id)
+                ->where('id', '!=', $reservation->id)
+                ->whereDate('reservation_date', $reservation->reservation_date)
+                ->whereIn('status', ['paid', 'lunas', 'confirmed', 'dp'])
+                ->where(function ($q) use ($reservation) {
+                    $q->where('start_time', '<', $reservation->end_time)
+                        ->where('end_time', '>', $reservation->start_time);
+                })
+                ->first();
+
+            if ($conflict) {
+                return back()->with('error', 'Gagal menyetujui: Slot jam ' . substr($reservation->start_time, 0, 5) . ' - ' . substr($reservation->end_time, 0, 5) . ' sudah terisi oleh reservasi lunas lain (#' . $conflict->code . ').');
+            }
+        }
 
         $updateData = ['status' => $newStatus];
         if ($newStatus === 'cancelled') {
@@ -542,7 +566,7 @@ class ReservationController extends Controller
     /**
      * Print / view booking ticket
      */
-    public function ticket(Reservation $reservation, Request $request): View
+    public function ticket(Reservation $reservation, Request $request): View|\Illuminate\Http\RedirectResponse
     {
         $user = Auth::user();
         $codeParam = $request->query('code');
@@ -559,6 +583,13 @@ class ReservationController extends Controller
 
         if (! $isAuthorized) {
             return redirect()->route('reservations.check')->with('error', 'Akses ditolak. Silakan masukkan Kode Booking untuk melihat struk/tiket.');
+        }
+
+        // Cek apakah reservasi sudah disetujui / lunas oleh admin sebelum cetak tiket
+        $isPaid = (in_array(strtolower($reservation->status), ['paid', 'lunas', 'confirmed', 'dp']) || ($reservation->transaction && in_array(strtolower($reservation->transaction->status), ['paid', 'completed'])));
+        if (! $isPaid && (! $user || ! $user->isAdmin())) {
+            return redirect()->route('reservations.show', ['reservation' => $reservation->id, 'code' => $reservation->booking_code])
+                ->with('warning', 'Bukti / tiket reservasi baru dapat dicetak setelah pembayaran disetujui oleh admin.');
         }
 
         $reservation->load(['field', 'user', 'transaction']);

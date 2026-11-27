@@ -79,7 +79,7 @@
                         @foreach($reservations as $res)
                             @php 
                                 $resTrx = $res->transaction; 
-                                $isLunas = ($res->status === 'confirmed' || ($resTrx && in_array($resTrx->status, ['paid', 'completed'])));
+                                $isLunas = (in_array(strtolower($res->status), ['paid', 'lunas', 'confirmed', 'dp']) || ($resTrx && in_array(strtolower($resTrx->status), ['paid', 'completed'])));
                                 $cName = trim($res->customer_name ?? '');
                                 if (empty($cName) || strcasecmp($cName, 'admin') === 0) {
                                     if ($res->user && ! $res->user->isAdmin()) {
@@ -184,9 +184,11 @@
                                                 <a href="{{ route('reservations.show', $res) }}?code={{ $res->code }}" class="btn {{ $isLunas ? 'btn-success' : 'btn-outline-primary' }} btn-sm">
                                                     <i class="bi bi-eye me-1"></i> {{ $isLunas ? 'Lihat Bukti Lunas' : 'Rincian Pesanan' }}
                                                 </a>
-                                                <a href="{{ route('reservations.ticket', $res) }}?code={{ $res->code }}" target="_blank" class="btn btn-outline-secondary btn-sm" title="Cetak Struk / Simpan Bukti">
-                                                    <i class="bi bi-printer me-1"></i> Cetak
-                                                </a>
+                                                @if($isLunas)
+                                                    <a href="{{ route('reservations.ticket', $res) }}?code={{ $res->code }}" target="_blank" class="btn btn-outline-secondary btn-sm" title="Cetak Struk / Simpan Bukti">
+                                                        <i class="bi bi-printer me-1"></i> Cetak
+                                                    </a>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>

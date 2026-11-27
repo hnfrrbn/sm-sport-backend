@@ -25,7 +25,11 @@
                             <i class="bi bi-check-circle-fill text-success me-1"></i> 2. Data Diri
                         </div>
                         <div class="col-4">
-                            <strong class="text-success small"><i class="bi bi-record-circle me-1"></i> 3. Bayar via WA</strong>
+                            @if(in_array(strtolower($reservation->status), ['paid', 'lunas', 'confirmed', 'dp']) || ($reservation->transaction && in_array(strtolower($reservation->transaction->status), ['paid', 'completed'])))
+                                <strong class="text-success small"><i class="bi bi-check-circle-fill me-1"></i> 3. Lunas &amp; Terkonfirmasi</strong>
+                            @else
+                                <strong class="text-success small"><i class="bi bi-record-circle me-1"></i> 3. Bayar via WA</strong>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -33,7 +37,7 @@
 
             @php
                 $transaction = $reservation->transaction;
-                $isPaid = ($reservation->status === 'confirmed' || ($transaction && in_array($transaction->status, ['paid', 'completed'])));
+                $isPaid = (in_array(strtolower($reservation->status), ['paid', 'lunas', 'confirmed', 'dp']) || ($transaction && in_array(strtolower($transaction->status), ['paid', 'completed'])));
                 $customerName = $reservation->customer_name ?: ($reservation->user->name ?? 'Pelanggan');
                 $customerPhone = $reservation->customer_phone ?: ($reservation->user->phone ?? '-');
 
@@ -84,7 +88,7 @@
                     <div>
                         @if($isPaid)
                             <span class="badge bg-success text-white py-1.5 px-3 fs-6">
-                                <i class="bi bi-patch-check-fill me-1"></i> LUNAS / TERKONFIRMASI
+                                <i class="bi bi-patch-check-fill me-1"></i> Lunas / Terkonfirmasi
                             </span>
                         @elseif($reservation->status === 'cancelled')
                             <span class="badge bg-danger-subtle text-danger border border-danger py-1.5 px-2.5">
@@ -165,15 +169,17 @@
                     <span>{{ $isPaid ? 'Hubungi Admin via WhatsApp (0813-8466-5386)' : 'Kirim & Bayar via WhatsApp Admin (0813-8466-5386)' }}</span>
                 </a>
 
-                <!-- Tombol Aksi Tambahan Bersih di Bawah -->
-                <div class="d-flex flex-wrap gap-2 mt-2">
-                    <a href="{{ route('reservations.ticket', $reservation->id) }}?code={{ $reservation->code }}" target="_blank" class="btn btn-outline-secondary flex-grow-1 py-2">
-                        <i class="bi bi-printer me-1"></i> Cetak / Simpan Bukti
-                    </a>
-                    <a href="{{ route('reservations.check') }}" class="btn btn-outline-secondary flex-grow-1 py-2">
-                        <i class="bi bi-search me-1"></i> Cek Status Pesanan
-                    </a>
-                </div>
+                @if($isPaid)
+                    <!-- Tombol Aksi Tambahan Bersih di Bawah (Hanya Tampil Setelah Disetujui / Lunas oleh Admin) -->
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <a href="{{ route('reservations.ticket', $reservation->id) }}?code={{ $reservation->code }}" target="_blank" class="btn btn-outline-secondary flex-grow-1 py-2">
+                            <i class="bi bi-printer me-1"></i> Cetak / Simpan Bukti
+                        </a>
+                        <a href="{{ route('reservations.check') }}" class="btn btn-outline-secondary flex-grow-1 py-2">
+                            <i class="bi bi-search me-1"></i> Cek Status Pesanan
+                        </a>
+                    </div>
+                @endif
             </div>
 
         </div>

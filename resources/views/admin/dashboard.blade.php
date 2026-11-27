@@ -159,6 +159,9 @@
                 <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.72rem;">
                     <i class="bi bi-plus-circle me-1"></i> Hijau: Tersedia (Klik untuk Booking)
                 </span>
+                <span class="badge bg-primary text-white px-2 py-1" style="font-size: 0.72rem; background-color: #2563EB !important;">
+                    <i class="bi bi-play-circle-fill me-1"></i> Biru: Sedang Dimainkan
+                </span>
                 <span class="badge bg-danger text-white px-2 py-1" style="font-size: 0.72rem;">
                     <i class="bi bi-lock-fill me-1"></i> Merah: Terisi (Lunas)
                 </span>
@@ -200,9 +203,13 @@
                                 <span class="badge bg-secondary text-white py-1 px-2.5">
                                     <i class="bi bi-slash-circle me-1"></i> Tutup / Maintenance
                                 </span>
+                            @elseif($rt['state'] === 'playing')
+                                <span class="badge text-white border-0 fw-semibold py-1 px-2.5 shadow-sm" style="background-color: #2563EB !important;" title="Sedang dimainkan saat ini">
+                                    <i class="bi bi-play-circle-fill me-1"></i> Sedang Dimainkan: <strong>{{ $rt['customer'] }}</strong> ({{ $rt['time'] }} WIB)
+                                </span>
                             @elseif($rt['state'] === 'in_use')
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-semibold py-1 px-2.5" title="Sedang dimainkan saat ini">
-                                    <i class="bi bi-person-fill me-1"></i> Sedang Dipakai: <strong>{{ $rt['customer'] }}</strong> • {{ $rt['time'] }} WIB
+                                <span class="badge bg-warning text-dark border border-warning fw-semibold py-1 px-2.5" title="Sesi booking sedang berlangsung (Menunggu Bayar)">
+                                    <i class="bi bi-clock-history me-1"></i> Menunggu Bayar: <strong>{{ $rt['customer'] }}</strong> • {{ $rt['time'] }} WIB
                                 </span>
                             @else
                                 <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold py-1 px-2.5">
@@ -215,7 +222,17 @@
                     <!-- Baris Bawah: Deretan Kotak Slot Jam (08:00 - 22:00) -->
                     <div class="d-flex flex-nowrap overflow-x-auto gap-1.5 pt-1 pb-1 schedule-slots-track" style="-webkit-overflow-scrolling: touch; scrollbar-width: thin;">
                         @foreach($slots as $slot)
-                            @if($slot['status'] === 'available')
+                            @if($slot['status'] === 'in_play')
+                                <button type="button" 
+                                        class="slot-box slot-in-play border-0 d-flex flex-column align-items-center justify-content-center" 
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-html="true" 
+                                        title="<strong>{{ e($slot['customer_name']) }}</strong> (SEDANG DIMAINKAN)<br>Kode: {{ $slot['booking_code'] }}<br>Jam: {{ $slot['start'] }} - {{ $slot['end'] }} WIB<br><em>Klik untuk rincian</em>"
+                                        onclick="showSlotDetail('{{ $slot['booking_code'] }}', '{{ addslashes($slot['customer_name']) }}', '{{ $slot['customer_phone'] }}', '{{ addslashes($field->name) }}', '{{ $scheduleDateIndo }}', '{{ $slot['start'] }} - {{ $slot['end'] }} WIB', 'Sedang Dimainkan (Lunas)', '{{ number_format($slot['total_price'], 0, ',', '.') }}', '{{ $slot['res_id'] }}', 'in_play', '{{ addslashes($slot['notes'] ?? '') }}')">
+                                    <span class="slot-time fw-bold text-white">{{ $slot['start'] }}</span>
+                                    <span class="slot-sub text-white"><i class="bi bi-play-circle-fill"></i></span>
+                                </button>
+                            @elseif($slot['status'] === 'available')
                                 <a href="{{ route('admin.manual_booking', ['field_id' => $field->id, 'reservation_date' => $scheduleDate, 'start_time' => $slot['start'], 'end_time' => $slot['end']]) }}" 
                                    class="slot-box slot-available text-decoration-none d-flex flex-column align-items-center justify-content-center"
                                    data-bs-toggle="tooltip" 
@@ -361,6 +378,25 @@
                                             </button>
                                         </form>
 
+                                        <!-- Tombol Edit / Reschedule -->
+                                        <button type="button" 
+                                                class="btn btn-sm btn-outline-warning text-dark px-2 py-1" 
+                                                title="Edit / Reschedule Jadwal"
+                                                data-id="{{ $rsv->id }}"
+                                                data-code="{{ $rsv->code }}"
+                                                data-name="{{ $cName }}"
+                                                data-phone="{{ $cPhone !== '-' ? $cPhone : '' }}"
+                                                data-field-id="{{ $rsv->field_id }}"
+                                                data-date="{{ \Carbon\Carbon::parse($rsv->reservation_date)->format('Y-m-d') }}"
+                                                data-start="{{ \Carbon\Carbon::parse($rsv->start_time)->format('H:i') }}"
+                                                data-duration="{{ $rsv->duration_hours ?: $rsv->calculateDuration() }}"
+                                                data-status="{{ $rsv->status }}"
+                                                data-total="{{ (int)$rsv->total_price }}"
+                                                data-notes="{{ $rsv->notes ?? '' }}"
+                                                onclick="openRescheduleModal(this)">
+                                            <i class="bi bi-pencil-square text-warning-emphasis"></i>
+                                        </button>
+
                                         <!-- Tombol Struk -->
                                         <a href="{{ route('reservations.ticket', $rsv->id) }}?code={{ $rsv->code }}" target="_blank" class="btn btn-sm btn-outline-secondary px-2 py-1" title="Cetak Struk">
                                             <i class="bi bi-printer"></i>
@@ -492,6 +528,23 @@
                                             </button>
                                         </form>
                                     @endif
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-warning text-dark py-0.5 px-2" 
+                                            title="Edit / Reschedule Jadwal"
+                                            data-id="{{ $rsv->id }}"
+                                            data-code="{{ $rsv->code }}"
+                                            data-name="{{ $cName }}"
+                                            data-phone="{{ $cPhone !== '-' ? $cPhone : '' }}"
+                                            data-field-id="{{ $rsv->field_id }}"
+                                            data-date="{{ \Carbon\Carbon::parse($rsv->reservation_date)->format('Y-m-d') }}"
+                                            data-start="{{ \Carbon\Carbon::parse($rsv->start_time)->format('H:i') }}"
+                                            data-duration="{{ $rsv->duration_hours ?: $rsv->calculateDuration() }}"
+                                            data-status="{{ $rsv->status }}"
+                                            data-total="{{ (int)$rsv->total_price }}"
+                                            data-notes="{{ $rsv->notes ?? '' }}"
+                                            onclick="openRescheduleModal(this)">
+                                        <i class="bi bi-pencil-square text-warning-emphasis"></i>
+                                    </button>
                                     <a href="{{ route('reservations.ticket', $rsv->id) }}?code={{ $rsv->code }}" class="btn btn-sm btn-outline-secondary py-0.5 px-2" target="_blank" title="Cetak Tiket/Struk">
                                         <i class="bi bi-printer"></i>
                                     </a>
@@ -572,6 +625,149 @@
         </div>
     </div>
 
+    <!-- Modal Edit & Reschedule (Pindah Jadwal) Pesanan -->
+    <div class="modal fade" id="rescheduleModal" tabindex="-1" aria-labelledby="rescheduleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header bg-light border-bottom py-3 px-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle bg-warning-subtle text-warning-emphasis p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                            <i class="bi bi-calendar-event fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold text-dark mb-0" id="rescheduleModalLabel">
+                                Edit & Pindah Jadwal Pesanan
+                            </h5>
+                            <small class="text-muted">Kode Pesanan: <strong class="font-monospace text-primary" id="rescheduleModalCode">-</strong></small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                
+                <form id="rescheduleForm" action="" method="POST">
+                    @csrf
+                    @method('PUT')
+                    
+                    <div class="modal-body p-4">
+                        <div class="alert alert-info py-2.5 px-3 small d-flex align-items-center gap-2 mb-3 border-0" style="background-color: #EFF6FF; border-left: 4px solid #3B82F6 !important; color: #1E40AF;">
+                            <i class="bi bi-info-circle-fill flex-shrink-0 fs-5"></i>
+                            <div>
+                                Anda dapat memperbarui data kontak pemesan, memindahkan lapangan, tanggal, jam main, serta durasi. Sistem otomatis memvalidasi bentrok jadwal dan menghitung ulang total tagihan.
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Data Pemesan -->
+                            <div class="col-md-6">
+                                <label for="edit_customer_name" class="form-label small fw-bold text-dark mb-1">
+                                    <i class="bi bi-person text-success me-1"></i> Nama Pemesan <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="customer_name" id="edit_customer_name" class="form-control" placeholder="Nama Lengkap" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_customer_phone" class="form-label small fw-bold text-dark mb-1">
+                                    <i class="bi bi-whatsapp text-success me-1"></i> No. WhatsApp <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="customer_phone" id="edit_customer_phone" class="form-control" placeholder="081234567890" required>
+                            </div>
+
+                            <div class="col-12"><hr class="my-1 text-muted"></div>
+
+                            <!-- Pilihan Lapangan & Tanggal -->
+                            <div class="col-md-6">
+                                <label for="edit_field_id" class="form-label small fw-bold text-dark mb-1">
+                                    <i class="bi bi-geo-alt text-success me-1"></i> Pilihan Lapangan <span class="text-danger">*</span>
+                                </label>
+                                <select name="field_id" id="edit_field_id" class="form-select fw-semibold" required onchange="calculateRescheduleTotal()">
+                                    @foreach($fieldsForSchedule ?? $availableFields as $f)
+                                        <option value="{{ $f->id }}" data-price="{{ $f->price_per_hour }}">
+                                            {{ $f->name }} ({{ ucfirst($f->type) }}) — Rp {{ number_format($f->price_per_hour, 0, ',', '.') }} / jam
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="edit_reservation_date" class="form-label small fw-bold text-dark mb-1">
+                                    <i class="bi bi-calendar3 text-success me-1"></i> Tanggal Main <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" name="reservation_date" id="edit_reservation_date" class="form-control fw-semibold" required>
+                            </div>
+
+                            <!-- Jam Mulai & Durasi -->
+                            <div class="col-md-6">
+                                <label for="edit_start_time" class="form-label small fw-bold text-dark mb-1">
+                                    <i class="bi bi-clock text-success me-1"></i> Jam Mulai Main <span class="text-danger">*</span>
+                                </label>
+                                <select name="start_time" id="edit_start_time" class="form-select fw-semibold" required onchange="calculateRescheduleTotal()">
+                                    @for($hour = 8; $hour <= 22; $hour++)
+                                        @php $hStr = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00'; @endphp
+                                        <option value="{{ $hStr }}">{{ $hStr }} WIB</option>
+                                    @endfor
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="edit_duration_hours" class="form-label small fw-bold text-dark mb-1">
+                                    <i class="bi bi-hourglass-split text-success me-1"></i> Durasi Jam Bermain <span class="text-danger">*</span>
+                                </label>
+                                <select name="duration_hours" id="edit_duration_hours" class="form-select fw-semibold" required onchange="calculateRescheduleTotal()">
+                                    <option value="1">1 Jam</option>
+                                    <option value="2">2 Jam</option>
+                                    <option value="3">3 Jam</option>
+                                    <option value="4">4 Jam</option>
+                                    <option value="5">5 Jam</option>
+                                </select>
+                            </div>
+
+                            <!-- Status Pembayaran & Estimasi Baru -->
+                            <div class="col-md-6">
+                                <label for="edit_status" class="form-label small fw-bold text-dark mb-1">
+                                    <i class="bi bi-cash-coin text-success me-1"></i> Status Pembayaran <span class="text-danger">*</span>
+                                </label>
+                                <select name="status" id="edit_status" class="form-select fw-semibold" required>
+                                    <option value="pending">Menunggu Pembayaran</option>
+                                    <option value="confirmed">Lunas (Terkonfirmasi)</option>
+                                    <option value="cancelled">Dibatalkan</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">
+                                    <i class="bi bi-calculator text-success me-1"></i> Estimasi Jam & Total Biaya Baru
+                                </label>
+                                <div class="p-2.5 rounded border bg-light d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="small text-muted" id="edit_time_range_label">-</div>
+                                        <div class="fw-bold text-success fs-6" id="edit_total_price_label">Rp 0</div>
+                                    </div>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle small">Otomatis Dihitung</span>
+                                </div>
+                            </div>
+
+                            <!-- Catatan Tambahan -->
+                            <div class="col-12">
+                                <label for="edit_notes" class="form-label small fw-bold text-dark mb-1">
+                                    <i class="bi bi-sticky text-muted me-1"></i> Catatan Tambahan / Alasan Reschedule
+                                </label>
+                                <textarea name="notes" id="edit_notes" class="form-control" rows="2" placeholder="Contoh: Permintaan pelanggan pindah dari Futsal 1 ke Futsal 2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer bg-light border-top py-2.5 px-4 d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold shadow-sm d-flex align-items-center gap-1.5">
+                            <i class="bi bi-check-circle-fill"></i> Simpan Perubahan Jadwal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <style>
@@ -605,6 +801,26 @@
     font-size: 0.65rem;
     line-height: 1;
     display: block;
+}
+.slot-in-play {
+    background: #2563EB !important;
+    border: 1px solid #1D4ED8 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+    animation: pulsePlay 2s infinite ease-in-out;
+}
+.slot-in-play:hover {
+    background: #1D4ED8 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(37, 99, 235, 0.4) !important;
+}
+@keyframes pulsePlay {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0);
+    }
 }
 .slot-available {
     background: #ECFDF5;
@@ -710,11 +926,17 @@ function showSlotDetail(code, customer, phone, field, dateStr, timeStr, status, 
     }
 
     const badge = document.getElementById('modalStatusBadge');
-    if (resStatus === 'confirmed') {
+    if (resStatus === 'in_play') {
+        badge.className = 'badge text-white py-1.5 px-2.5 fw-semibold border-0';
+        badge.style.backgroundColor = '#2563EB';
+        badge.innerHTML = '<i class="bi bi-play-circle-fill me-1"></i> Sedang Dimainkan (Lunas)';
+    } else if (resStatus === 'confirmed') {
         badge.className = 'badge bg-success-subtle text-success border border-success-subtle py-1.5 px-2.5 fw-semibold';
+        badge.style.backgroundColor = '';
         badge.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Lunas / Terkonfirmasi';
     } else {
         badge.className = 'badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1.5 px-2.5 fw-semibold';
+        badge.style.backgroundColor = '';
         badge.innerHTML = '<i class="bi bi-clock-history me-1"></i> Menunggu Bayar WA';
     }
 
@@ -731,6 +953,72 @@ function showSlotDetail(code, customer, phone, field, dateStr, timeStr, status, 
 
     var detailModal = new bootstrap.Modal(document.getElementById('slotDetailModal'));
     detailModal.show();
+}
+
+// 4. Fungsi Tampilkan Modal Edit & Reschedule Pesanan
+function openRescheduleModal(btn) {
+    const id = btn.getAttribute('data-id');
+    const code = btn.getAttribute('data-code');
+    const name = btn.getAttribute('data-name');
+    const phone = btn.getAttribute('data-phone');
+    const fieldId = btn.getAttribute('data-field-id');
+    const date = btn.getAttribute('data-date');
+    const start = btn.getAttribute('data-start');
+    const duration = btn.getAttribute('data-duration');
+    const status = btn.getAttribute('data-status');
+    const notes = btn.getAttribute('data-notes');
+
+    document.getElementById('rescheduleModalCode').textContent = code;
+    document.getElementById('rescheduleForm').action = '/admin/reservations/' + id + '/reschedule';
+    document.getElementById('edit_customer_name').value = name || '';
+    document.getElementById('edit_customer_phone').value = phone || '';
+    document.getElementById('edit_field_id').value = fieldId;
+    document.getElementById('edit_reservation_date').value = date;
+    
+    // Normalisasi jam mulai ke format HH:00
+    let startHour = '08:00';
+    if (start) {
+        const parts = start.split(':');
+        const h = parseInt(parts[0], 10);
+        startHour = (h < 10 ? '0' : '') + h + ':00';
+    }
+    document.getElementById('edit_start_time').value = startHour;
+    document.getElementById('edit_duration_hours').value = duration || '1';
+    document.getElementById('edit_status').value = status || 'confirmed';
+    document.getElementById('edit_notes').value = notes || '';
+
+    calculateRescheduleTotal();
+
+    var rescheduleModalEl = document.getElementById('rescheduleModal');
+    var modalInstance = bootstrap.Modal.getInstance(rescheduleModalEl) || new bootstrap.Modal(rescheduleModalEl);
+    modalInstance.show();
+}
+
+// 5. Hitung Estimasi Rentang Jam & Total Biaya Baru
+function calculateRescheduleTotal() {
+    const fieldSelect = document.getElementById('edit_field_id');
+    const selectedOption = fieldSelect ? fieldSelect.options[fieldSelect.selectedIndex] : null;
+    const pricePerHour = selectedOption ? parseFloat(selectedOption.getAttribute('data-price') || 0) : 0;
+    
+    const durationSelect = document.getElementById('edit_duration_hours');
+    const duration = parseInt(durationSelect ? durationSelect.value : 1, 10) || 1;
+
+    const startTimeSelect = document.getElementById('edit_start_time');
+    const startVal = startTimeSelect ? (startTimeSelect.value || '08:00') : '08:00';
+    const startHourInt = parseInt(startVal.split(':')[0], 10) || 8;
+    const endHourInt = startHourInt + duration;
+    const endHourStr = (endHourInt < 10 ? '0' : '') + endHourInt + ':00';
+
+    const total = pricePerHour * duration;
+
+    const timeLabel = document.getElementById('edit_time_range_label');
+    const priceLabel = document.getElementById('edit_total_price_label');
+    if (timeLabel) {
+        timeLabel.textContent = startVal + ' - ' + endHourStr + ' WIB (' + duration + ' Jam)';
+    }
+    if (priceLabel) {
+        priceLabel.textContent = 'Rp ' + total.toLocaleString('id-ID');
+    }
 }
 </script>
 @endpush

@@ -83,6 +83,24 @@
             gap: 0.65rem;
         }
 
+        .brand-monogram {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-emerald);
+            color: #FFFFFF !important;
+            font-weight: 800;
+            font-size: 0.92rem;
+            letter-spacing: -0.04em;
+            border-radius: 9px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.25);
+            flex-shrink: 0;
+            line-height: 1;
+            user-select: none;
+        }
+
         .brand-badge {
             width: 36px;
             height: 36px;
@@ -245,31 +263,42 @@
 
         /* Safe padding bottom for mobile & desktop */
         main {
-            padding-bottom: 70px !important;
+            padding-bottom: 96px !important;
             flex: 1 0 auto;
         }
 
         .site-footer {
             background: #FFFFFF;
             border-top: 1px solid var(--border-subtle);
-            padding: 2rem 0;
-            padding-bottom: 85px !important;
+            padding: 2.5rem 0 96px 0 !important;
             color: var(--text-muted);
             font-size: 0.875rem;
         }
 
+        /* Mobile navbar explicit collapse */
+        @media (max-width: 991.98px) {
+            .site-navbar .navbar-collapse:not(.show) {
+                display: none !important;
+            }
+        }
+
+        /* If sticky bottom bar is present & active on mobile, lift floating WhatsApp */
+        body:has(#stickyBottomBar:not(.d-none)) .floating-whatsapp {
+            bottom: 84px !important;
+        }
+
         @media (max-width: 767.98px) {
             .floating-whatsapp {
-                bottom: 16px;
+                bottom: 18px;
                 right: 16px;
                 padding: 8px 14px;
                 font-size: 0.8rem;
             }
             main {
-                padding-bottom: 95px !important;
+                padding-bottom: 105px !important;
             }
             .site-footer {
-                padding-bottom: 105px !important;
+                padding-bottom: 110px !important;
             }
             .btn {
                 min-height: 42px;
@@ -287,9 +316,7 @@
     <nav class="navbar navbar-expand-lg site-navbar py-2.5">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
-                <span class="brand-badge">
-                    <i class="bi bi-dribbble"></i>
-                </span>
+                <span class="brand-monogram">SM</span>
                 <span>SM Sport Center</span>
             </a>
 
@@ -299,61 +326,58 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-1 gap-lg-3 mt-2 mt-lg-0">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-1 gap-lg-2 mt-2 mt-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="{{ route('home') }}#daftar-lapangan">
-                            <i class="bi bi-calendar-check me-1 text-success"></i> Pesan Lapangan
+                        <a class="nav-link fw-semibold {{ request()->routeIs('home') ? 'active text-success' : '' }}" href="{{ route('home') }}">
+                            <i class="bi bi-house-door me-1"></i> Beranda
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="{{ route('reservations.check') }}">
-                            <i class="bi bi-search me-1 text-success"></i> Cek Status Pesanan
+                        <a class="nav-link fw-semibold {{ request()->routeIs('reservations.create') ? 'active text-success' : '' }}" href="{{ route('reservations.create') }}">
+                            <i class="bi bi-calendar-check me-1"></i> Pesan Lapangan
                         </a>
                     </li>
-                    <li class="nav-item ms-lg-2">
-                        @auth
-                            @if(auth()->user()->isAdmin())
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle px-3 py-1.5" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-shield-lock-fill me-1"></i> Admin ({{ auth()->user()->name }})
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold {{ request()->routeIs('reservations.check') ? 'active text-success' : '' }}" href="{{ route('reservations.check') }}">
+                            <i class="bi bi-search me-1"></i> Cek Status Pesanan
+                        </a>
+                    </li>
+                    @auth
+                        @if(auth()->user()->isAdmin())
+                            <li class="nav-item ms-lg-2">
+                                <a href="{{ route('admin.dashboard') }}" class="btn btn-sm btn-outline-success px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5">
+                                    <i class="bi bi-speedometer2"></i>
+                                    <span>Dashboard Admin</span>
+                                </a>
+                            </li>
+                            <li class="nav-item ms-lg-1">
+                                <form action="{{ route('logout') }}" method="POST" class="d-inline m-0">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-danger px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 text-white shadow-sm" title="Keluar dari Akun Admin">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        <span>Logout</span>
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border mt-1">
-                                        <li><a class="dropdown-item small" href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Dashboard Admin</a></li>
-                                        <li><a class="dropdown-item small" href="{{ route('admin.reservations.index') }}"><i class="bi bi-journal-text me-2"></i> Kelola Reservasi</a></li>
-                                        <li><a class="dropdown-item small" href="{{ route('admin.manual_booking') }}"><i class="bi bi-pencil-square me-2"></i> Booking Manual</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <form action="{{ route('logout') }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="dropdown-item text-danger small"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
-                            @else
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle px-3 py-1.5" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-person-fill me-1"></i> {{ auth()->user()->name }}
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border mt-1">
-                                        <li><a class="dropdown-item small" href="{{ route('dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Dashboard Saya</a></li>
-                                        <li><a class="dropdown-item small" href="{{ route('customer.reservations') }}"><i class="bi bi-calendar3 me-2"></i> Pesanan Saya</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <form action="{{ route('logout') }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="dropdown-item text-danger small"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
-                            @endif
+                                </form>
+                            </li>
                         @else
-                            <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm px-3 py-1.5 text-muted" title="Masuk ke Panel Pengelola">
-                                <i class="bi bi-lock me-1"></i> Login Admin
+                            <li class="nav-item ms-lg-2">
+                                <form action="{{ route('logout') }}" method="POST" class="d-inline m-0">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-danger px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        <span>Logout</span>
+                                    </button>
+                                </form>
+                            </li>
+                        @endif
+                    @else
+                        <li class="nav-item ms-lg-2">
+                            <a href="{{ route('login') }}" class="btn btn-sm btn-outline-secondary px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 text-muted" title="Masuk ke Panel Pengelola">
+                                <i class="bi bi-lock me-1"></i>
+                                <span>Login Admin</span>
                             </a>
-                        @endauth
-                    </li>
+                        </li>
+                    @endauth
                 </ul>
             </div>
         </div>
@@ -381,6 +405,16 @@
             </div>
         @endif
 
+        @if(session('warning'))
+            <div class="container mt-3">
+                <div class="alert alert-warning alert-dismissible fade show border-0 shadow-sm d-flex align-items-center gap-2" style="background-color: #FFFBEB; border-left: 4px solid #F59E0B !important; color: #92400E;" role="alert">
+                    <i class="bi bi-exclamation-circle-fill text-warning fs-5"></i>
+                    <div>{{ session('warning') }}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        @endif
+
         @yield('content')
     </main>
 
@@ -389,8 +423,9 @@
         <div class="container">
             <div class="row g-3 align-items-center justify-content-between">
                 <div class="col-md-6 text-center text-md-start">
-                    <div class="fw-bold text-dark mb-1">
-                        <i class="bi bi-dribbble text-success me-1"></i> SM Sport Center
+                    <div class="fw-bold text-dark mb-1 d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+                        <span class="brand-monogram" style="width: 26px; height: 26px; font-size: 0.72rem; border-radius: 6px;">SM</span>
+                        <span>SM Sport Center</span>
                     </div>
                     <div class="small text-muted">
                         <i class="bi bi-geo-alt text-danger me-1"></i> Jati Padang, RT/RW 006/003, Pasar Minggu, Jakarta Selatan
@@ -408,8 +443,28 @@
                     </div>
                 </div>
             </div>
-            <div class="pt-3 mt-3 border-top text-center small text-muted">
-                &copy; {{ date('Y') }} <strong>SM Sport Center</strong>. Sistem Booking Lapangan Olahraga.
+            <div class="pt-3 mt-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 small text-muted">
+                <div>
+                    &copy; {{ date('Y') }} <strong>SM Sport Center</strong>. Sistem Booking Lapangan Olahraga.
+                </div>
+                <div>
+                    @auth
+                        @if(auth()->user()->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="text-secondary text-decoration-none">
+                                <i class="bi bi-shield-lock me-1"></i> Dashboard Admin
+                            </a>
+                        @else
+                            <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-link btn-sm text-secondary text-decoration-none p-0">Logout</button>
+                            </form>
+                        @endif
+                    @else
+                        <a href="{{ route('login') }}" class="text-secondary text-decoration-none" title="Masuk ke Panel Pengelola SM Sport Center">
+                            <i class="bi bi-shield-lock me-1"></i> Portal Admin
+                        </a>
+                    @endauth
+                </div>
             </div>
         </div>
     </footer>

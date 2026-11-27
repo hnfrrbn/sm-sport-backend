@@ -101,6 +101,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
     Route::get('/reservations/{reservation}', [ReservationController::class, 'show'])->name('reservations.show');
+    Route::match(['put', 'post'], '/reservations/{reservation}/reschedule', [AdminController::class, 'rescheduleReservation'])->name('reservations.reschedule');
     Route::post('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])->name('reservations.status');
     Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
 

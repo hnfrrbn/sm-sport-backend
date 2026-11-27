@@ -194,14 +194,25 @@ class AdminController extends Controller
                 $onRes = $ongoingReservations[$field->id];
                 $onName = $resolveCustomerName($onRes);
                 $onTime = Carbon::parse($onRes->start_time)->format('H:i') . ' - ' . Carbon::parse($onRes->end_time)->format('H:i');
-                $realtimeBadge = [
-                    'state' => 'in_use',
-                    'class' => 'bg-danger text-white',
-                    'label' => 'Sedang Dipakai',
-                    'detail' => 'Dipakai: ' . $onName . ' • ' . $onTime,
-                    'customer' => $onName,
-                    'time' => $onTime,
-                ];
+                if ($onRes->status === 'confirmed') {
+                    $realtimeBadge = [
+                        'state' => 'playing',
+                        'class' => 'bg-primary text-white border border-primary',
+                        'label' => 'Sedang Dimainkan: ' . $onName . ' (' . $onTime . ' WIB)',
+                        'detail' => 'Sedang berlangsung: ' . $onName . ' • ' . $onTime,
+                        'customer' => $onName,
+                        'time' => $onTime,
+                    ];
+                } else {
+                    $realtimeBadge = [
+                        'state' => 'in_use',
+                        'class' => 'bg-warning text-dark border border-warning',
+                        'label' => 'Menunggu Pembayaran: ' . $onName . ' (' . $onTime . ' WIB)',
+                        'detail' => 'Menunggu bayar: ' . $onName . ' • ' . $onTime,
+                        'customer' => $onName,
+                        'time' => $onTime,
+                    ];
+                }
             } else {
                 $realtimeBadge = [
                     'state' => 'available',
@@ -233,47 +244,75 @@ class AdminController extends Controller
                     });
                 }
 
+                $isCurrentSlot = $isScheduleToday && (substr($currentTime, 0, 5) >= $slot['start'] && substr($currentTime, 0, 5) < $slot['end']);
+                $isPastSlot = $isScheduleToday && ($slot['end'] <= substr($currentTime, 0, 5));
+
                 if ($confirmedRes) {
-                    // Wajib MERAH (terkunci), meskipun jamnya sudah lewat
                     $cName = $resolveCustomerName($confirmedRes);
                     $cPhone = $confirmedRes->customer_phone ?: ($confirmedRes->user?->phone ?? '-');
-                    $fieldSlots[] = [
-                        'start' => $slot['start'],
-                        'end' => $slot['end'],
-                        'status' => 'booked',
-                        'res_status' => 'confirmed',
-                        'res_id' => $confirmedRes->id,
-                        'booking_code' => $confirmedRes->code,
-                        'customer_name' => $cName,
-                        'customer_phone' => $cPhone,
-                        'total_price' => $confirmedRes->total_price,
-                        'notes' => $confirmedRes->notes,
-                    ];
+                    
+                    if ($isCurrentSlot) {
+                        // PRIORITAS 1: Biru (Sedang Dimainkan) - Tanggal hari ini + jam sekarang berada di dalam slot + Lunas
+                        $fieldSlots[] = [
+                            'start' => $slot['start'],
+                            'end' => $slot['end'],
+                            'status' => 'in_play',
+                            'res_status' => 'confirmed',
+                            'res_id' => $confirmedRes->id,
+                            'booking_code' => $confirmedRes->code,
+                            'customer_name' => $cName,
+                            'customer_phone' => $cPhone,
+                            'total_price' => $confirmedRes->total_price,
+                            'notes' => $confirmedRes->notes,
+                        ];
+                    } else {
+                        // PRIORITAS 2: Merah (Terisi / Lunas)
+                        $fieldSlots[] = [
+                            'start' => $slot['start'],
+                            'end' => $slot['end'],
+                            'status' => 'booked',
+                            'res_status' => 'confirmed',
+                            'res_id' => $confirmedRes->id,
+                            'booking_code' => $confirmedRes->code,
+                            'customer_name' => $cName,
+                            'customer_phone' => $cPhone,
+                            'total_price' => $confirmedRes->total_price,
+                            'notes' => $confirmedRes->notes,
+                        ];
+                    }
                 } elseif ($pendingRes) {
-                    // Wajib ORANYE
                     $cName = $resolveCustomerName($pendingRes);
                     $cPhone = $pendingRes->customer_phone ?: ($pendingRes->user?->phone ?? '-');
-                    $fieldSlots[] = [
-                        'start' => $slot['start'],
-                        'end' => $slot['end'],
-                        'status' => 'booked',
-                        'res_status' => 'pending',
-                        'res_id' => $pendingRes->id,
-                        'booking_code' => $pendingRes->code,
-                        'customer_name' => $cName,
-                        'customer_phone' => $cPhone,
-                        'total_price' => $pendingRes->total_price,
-                        'notes' => $pendingRes->notes,
-                    ];
-                } elseif ($isScheduleToday && ($slot['end'] <= substr($currentTime, 0, 5))) {
-                    // PRIORITAS 3: Slot kosong dan waktunya sudah lewat dari jam sekarang -> ABU-ABU ("Lewat")
+                    if ($isPastSlot) {
+                        $fieldSlots[] = [
+                            'start' => $slot['start'],
+                            'end' => $slot['end'],
+                            'status' => 'past',
+                        ];
+                    } else {
+                        // PRIORITAS 3: Oranye (Menunggu Bayar WA)
+                        $fieldSlots[] = [
+                            'start' => $slot['start'],
+                            'end' => $slot['end'],
+                            'status' => 'booked',
+                            'res_status' => 'pending',
+                            'res_id' => $pendingRes->id,
+                            'booking_code' => $pendingRes->code,
+                            'customer_name' => $cName,
+                            'customer_phone' => $cPhone,
+                            'total_price' => $pendingRes->total_price,
+                            'notes' => $pendingRes->notes,
+                        ];
+                    }
+                } elseif ($isPastSlot) {
+                    // PRIORITAS 4: Abu-abu (Jam Lewat)
                     $fieldSlots[] = [
                         'start' => $slot['start'],
                         'end' => $slot['end'],
                         'status' => 'past',
                     ];
                 } else {
-                    // PRIORITAS 4: Slot kosong dan belum lewat -> HIJAU ("+")
+                    // PRIORITAS 5: Hijau (Tersedia)
                     $fieldSlots[] = [
                         'start' => $slot['start'],
                         'end' => $slot['end'],
@@ -338,14 +377,28 @@ class AdminController extends Controller
         $reservation = $transaction->reservation;
 
         if ($validated['action'] === 'approve') {
-            $transaction->status = 'paid';
-            $transaction->payment_date = now();
-            $transaction->save();
-
             if ($reservation) {
+                $conflict = Reservation::where('field_id', $reservation->field_id)
+                    ->where('id', '!=', $reservation->id)
+                    ->whereDate('reservation_date', $reservation->reservation_date)
+                    ->whereIn('status', ['paid', 'lunas', 'confirmed', 'dp'])
+                    ->where(function ($q) use ($reservation) {
+                        $q->where('start_time', '<', $reservation->end_time)
+                            ->where('end_time', '>', $reservation->start_time);
+                    })
+                    ->first();
+
+                if ($conflict) {
+                    return back()->with('error', 'Gagal menyetujui: Slot jam ' . substr($reservation->start_time, 0, 5) . ' - ' . substr($reservation->end_time, 0, 5) . ' sudah terisi oleh reservasi lunas lain (#' . $conflict->code . ').');
+                }
+
                 $reservation->status = 'confirmed';
                 $reservation->save();
             }
+
+            $transaction->status = 'paid';
+            $transaction->payment_date = now();
+            $transaction->save();
 
             ActivityLog::log(
                 $user,
@@ -424,10 +477,10 @@ class AdminController extends Controller
 
         $field = Field::findOrFail($validated['field_id']);
 
-        // Check for conflicting reservations
+        // Check for conflicting reservations that are already approved
         $conflict = Reservation::where('field_id', $field->id)
             ->whereDate('reservation_date', $validated['reservation_date'])
-            ->whereIn('status', ['pending', 'confirmed'])
+            ->whereIn('status', ['paid', 'lunas', 'confirmed', 'dp'])
             ->where(function ($q) use ($startTime, $endTime) {
                 $q->whereBetween('start_time', [$startTime->format('H:i:s'), $endTime->format('H:i:s')])
                     ->orWhereBetween('end_time', [$startTime->format('H:i:s'), $endTime->format('H:i:s')])
@@ -500,5 +553,124 @@ class AdminController extends Controller
         return redirect()->route('reservations.ticket', $reservation->id)->with([
             'success' => "Booking manual atas nama {$validated['customer_name']} berhasil dibuat! Tiket/struk siap dicetak.",
         ]);
+    }
+
+    /**
+     * Reschedule / Edit an existing reservation
+     */
+    public function rescheduleReservation(Request $request, Reservation $reservation)
+    {
+        $user = auth()->user();
+        if (! $user || ! $user->isAdmin()) {
+            abort(403, 'Hanya admin yang dapat mengubah jadwal reservasi');
+        }
+
+        $validated = $request->validate([
+            'customer_name' => ['required', 'string', 'max:255'],
+            'customer_phone' => ['required', 'string', 'max:30'],
+            'field_id' => ['required', 'exists:fields,id'],
+            'reservation_date' => ['required', 'date'],
+            'start_time' => ['required', 'string'],
+            'duration_hours' => ['required', 'integer', 'min:1', 'max:12'],
+            'status' => ['required', 'in:pending,confirmed,cancelled'],
+            'notes' => ['nullable', 'string', 'max:500'],
+        ], [
+            'customer_name.required' => 'Nama pemesan wajib diisi.',
+            'customer_phone.required' => 'Nomor WhatsApp wajib diisi.',
+            'field_id.required' => 'Pilihan lapangan wajib ditentukan.',
+            'reservation_date.required' => 'Tanggal bermain wajib diisi.',
+            'start_time.required' => 'Jam mulai main wajib dipilih.',
+            'duration_hours.required' => 'Durasi bermain wajib ditentukan.',
+            'status.required' => 'Status pembayaran wajib dipilih.',
+        ]);
+
+        $field = Field::findOrFail($validated['field_id']);
+        
+        // Parse waktu & hitung jam selesai
+        $startCarbon = Carbon::parse($validated['start_time']);
+        $startTimeStr = $startCarbon->format('H:i:s');
+        $durationHours = (int) $validated['duration_hours'];
+        $endCarbon = $startCarbon->copy()->addHours($durationHours);
+        $endTimeStr = $endCarbon->format('H:i:s');
+
+        // VALIDASI ANTI-BENTROK:
+        // Cek apakah lapangan dan jam tujuan bentrok dengan pesanan lain yang berstatus Lunas (confirmed / paid)
+        if ($validated['status'] !== 'cancelled') {
+            $clash = Reservation::where('id', '!=', $reservation->id)
+                ->where('field_id', $field->id)
+                ->whereDate('reservation_date', $validated['reservation_date'])
+                ->whereIn('status', ['confirmed', 'paid'])
+                ->where(function ($query) use ($startTimeStr, $endTimeStr) {
+                    $query->where('start_time', '<', $endTimeStr)
+                          ->where('end_time', '>', $startTimeStr);
+                })
+                ->first();
+
+            if ($clash) {
+                $clashStart = Carbon::parse($clash->start_time)->format('H:i');
+                $clashEnd = Carbon::parse($clash->end_time)->format('H:i');
+                $clashName = $clash->customer_name ?: ($clash->user?->name ?? 'Pelanggan');
+                return back()->withInput()->with('error', "Jadwal bentrok! Lapangan {$field->name} pada tanggal {$validated['reservation_date']} jam {$clashStart} - {$clashEnd} WIB sudah dipesan dan berstatus Lunas oleh {$clashName} ({$clash->code}). Silakan pilih lapangan, tanggal, atau jam main lain.");
+            }
+        }
+
+        // Hitung ulang total tagihan otomatis berdasarkan tarif per jam lapangan dan durasi terbaru
+        $newTotalPrice = (float) ($field->price_per_hour * $durationHours);
+
+        $oldDate = Carbon::parse($reservation->reservation_date)->format('Y-m-d');
+        $oldField = $reservation->field?->name ?? 'Lapangan';
+        $oldStartTimeStr = is_object($reservation->start_time) ? $reservation->start_time->format('H:i') : substr($reservation->start_time, 0, 5);
+        $oldEndTimeStr = is_object($reservation->end_time) ? $reservation->end_time->format('H:i') : substr($reservation->end_time, 0, 5);
+        $oldTime = $oldStartTimeStr . '-' . $oldEndTimeStr;
+
+        // Update data reservasi
+        $reservation->customer_name = $validated['customer_name'];
+        $reservation->customer_phone = $validated['customer_phone'];
+        $reservation->field_id = $field->id;
+        $reservation->reservation_date = $validated['reservation_date'];
+        $reservation->start_time = $startTimeStr;
+        $reservation->end_time = $endTimeStr;
+        $reservation->duration_hours = $durationHours;
+        $reservation->total_price = $newTotalPrice;
+        $reservation->status = $validated['status'];
+        $reservation->notes = $validated['notes'];
+
+        if ($validated['status'] === 'confirmed') {
+            $reservation->amount_paid = $newTotalPrice;
+            $reservation->remaining_amount = 0;
+            $reservation->paid_at = $reservation->paid_at ?: Carbon::now('Asia/Jakarta');
+        } elseif ($validated['status'] === 'cancelled') {
+            $reservation->cancelled_at = Carbon::now('Asia/Jakarta');
+            $reservation->cancellation_reason = 'Dibatalkan oleh Admin via Edit/Reschedule';
+        }
+
+        $reservation->save();
+
+        // Sinkronisasi ke Transaction terkait jika ada
+        if ($reservation->transaction) {
+            $trx = $reservation->transaction;
+            $trx->amount = $newTotalPrice;
+            if ($validated['status'] === 'confirmed') {
+                $trx->amount_paid = $newTotalPrice;
+                $trx->remaining_amount = 0;
+                $trx->status = 'completed';
+                $trx->paid_at = $trx->paid_at ?: Carbon::now('Asia/Jakarta');
+            } elseif ($validated['status'] === 'cancelled') {
+                $trx->status = 'cancelled';
+            } elseif ($validated['status'] === 'pending') {
+                $trx->status = 'pending';
+            }
+            $trx->save();
+        }
+
+        ActivityLog::log(
+            $user, 
+            'update', 
+            'Reservation', 
+            $reservation->id, 
+            "Rescheduled pesanan {$reservation->code} dari {$oldField} ({$oldDate} {$oldTime}) ke {$field->name} ({$validated['reservation_date']} {$startCarbon->format('H:i')}-{$endCarbon->format('H:i')})"
+        );
+
+        return back()->with('success', "Berhasil mengubah jadwal / data pesanan {$reservation->code}! Jadwal kini dipindahkan ke {$field->name} ({$validated['reservation_date']} {$startCarbon->format('H:i')} - {$endCarbon->format('H:i')} WIB) dengan total tagihan Rp " . number_format($newTotalPrice, 0, ',', '.') . ".");
     }
 }

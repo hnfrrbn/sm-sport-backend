@@ -105,12 +105,14 @@
                             @php
                                 $indoDays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
                                 $indoMonths = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-                                $initialDate = old('reservation_date', request('date', date('Y-m-d')));
+                                $todayWib = \Carbon\Carbon::now('Asia/Jakarta')->startOfDay();
+                                $todayWibStr = $todayWib->format('Y-m-d');
+                                $initialDate = old('reservation_date', request('date', $todayWibStr));
                             @endphp
                             <div class="date-scroll-container pb-2" id="dateScrollContainer">
                                 @for($i = 0; $i < 14; $i++)
                                     @php
-                                        $d = \Carbon\Carbon::today()->addDays($i);
+                                        $d = $todayWib->copy()->addDays($i);
                                         $dVal = $d->format('Y-m-d');
                                         $dayOfWeek = $indoDays[$d->dayOfWeek];
                                         $dayNum = $d->format('d');
@@ -137,7 +139,7 @@
                                            id="dateInput" 
                                            class="form-control" 
                                            value="{{ $initialDate }}" 
-                                           min="{{ date('Y-m-d') }}" 
+                                           min="{{ $todayWibStr }}" 
                                            required>
                                 </div>
                             </div>
@@ -641,11 +643,10 @@ document.addEventListener('DOMContentLoaded', function () {
     function getDefaultSlots() {
         const slots = [];
         const dateVal = hiddenDateVal.value || (dateInput ? dateInput.value : '');
-        const todayStr = new Date().toLocaleDateString('en-CA');
+        const todayStr = "{{ \Carbon\Carbon::now('Asia/Jakarta')->toDateString() }}";
         const isToday = (dateVal === todayStr);
         const isPastDate = (dateVal < todayStr);
-        const now = new Date();
-        const currentHour = now.getHours();
+        const currentHour = {{ (int) \Carbon\Carbon::now('Asia/Jakarta')->format('H') }};
 
         for (let h = 8; h < 23; h++) {
             const startStr = String(h).padStart(2, '0') + ':00';
