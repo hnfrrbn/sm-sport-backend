@@ -157,7 +157,7 @@
                                     <button type="button" id="btnResetSlots" class="btn btn-outline-danger btn-sm py-0 px-2 d-none" style="font-size: 0.75rem;">
                                         Reset Jam
                                     </button>
-                                    <div class="d-flex align-items-center gap-2 small text-muted" style="font-size: 0.75rem;">
+                                    <div class="d-flex align-items-center gap-2 small text-muted flex-wrap" style="font-size: 0.75rem;">
                                         <span class="d-inline-flex align-items-center gap-1">
                                             <span style="width: 10px; height: 10px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 2px;"></span> Tersedia
                                         </span>
@@ -165,7 +165,13 @@
                                             <span style="width: 10px; height: 10px; background: #059669; border-radius: 2px;"></span> Terpilih
                                         </span>
                                         <span class="d-inline-flex align-items-center gap-1">
+                                            <span style="width: 10px; height: 10px; background: #2563EB; border-radius: 2px;"></span> Sedang Dimainkan
+                                        </span>
+                                        <span class="d-inline-flex align-items-center gap-1">
                                             <span style="width: 10px; height: 10px; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 2px;"></span> Terisi
+                                        </span>
+                                        <span class="d-inline-flex align-items-center gap-1">
+                                            <span style="width: 10px; height: 10px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 2px;"></span> Menunggu Bayar
                                         </span>
                                         <span class="d-inline-flex align-items-center gap-1">
                                             <span style="width: 10px; height: 10px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 2px;"></span> Lewat
@@ -534,6 +540,36 @@
         color: #DC2626 !important;
         font-weight: 700;
     }
+    .slot-ayo-card.slot-in-play {
+        background: #EFF6FF !important;
+        border-color: #BFDBFE !important;
+        color: #1D4ED8 !important;
+        cursor: not-allowed;
+        opacity: 0.95;
+    }
+    .slot-ayo-card.slot-in-play .slot-time {
+        color: #1E40AF !important;
+        font-weight: 700;
+    }
+    .slot-ayo-card.slot-in-play .slot-price {
+        color: #2563EB !important;
+        font-weight: 700;
+    }
+    .slot-ayo-card.slot-pending {
+        background: #FFFBEB !important;
+        border-color: #FDE68A !important;
+        color: #D97706 !important;
+        cursor: not-allowed;
+        opacity: 0.95;
+    }
+    .slot-ayo-card.slot-pending .slot-time {
+        color: #92400E !important;
+        text-decoration: line-through;
+    }
+    .slot-ayo-card.slot-pending .slot-price {
+        color: #B45309 !important;
+        font-weight: 700;
+    }
 
     /* Sticky Bottom Bar Ala AYO */
     .sticky-bottom-bar {
@@ -717,9 +753,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         availableSlots.forEach((slot, idx) => {
             const isPast = (slot.status === 'past');
+            const isInPlay = (slot.status === 'in_play');
             const isBooked = (slot.status === 'booked');
+            const isPending = (slot.status === 'pending');
             const isMaintenance = (slot.status === 'maintenance');
-            const isUnavailable = isPast || isBooked || isMaintenance;
+            const isUnavailable = isPast || isInPlay || isBooked || isPending || isMaintenance;
             const isSelected = selectedIndices.includes(idx);
 
             const col = document.createElement('div');
@@ -734,9 +772,15 @@ document.addEventListener('DOMContentLoaded', function () {
             if (isPast) {
                 cardClass += ' slot-past';
                 labelText = 'Lewat';
+            } else if (isInPlay) {
+                cardClass += ' slot-in-play';
+                labelText = 'Sedang Main';
             } else if (isBooked) {
                 cardClass += ' slot-booked';
                 labelText = 'Terisi';
+            } else if (isPending) {
+                cardClass += ' slot-pending';
+                labelText = 'Menunggu Bayar';
             } else if (isMaintenance) {
                 cardClass += ' slot-booked';
                 labelText = 'Tutup';

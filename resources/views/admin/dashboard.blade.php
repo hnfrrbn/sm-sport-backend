@@ -264,13 +264,25 @@
                                     </button>
                                 @endif
                             @else
-                                <div class="slot-box slot-past d-flex flex-column align-items-center justify-content-center" 
-                                     data-bs-toggle="tooltip" 
-                                     data-bs-placement="top" 
-                                     title="Jam telah lewat ({{ $slot['start'] }} - {{ $slot['end'] }} WIB)">
-                                    <span class="slot-time text-muted">{{ $slot['start'] }}</span>
-                                    <span class="slot-sub text-muted" style="font-size: 0.65rem;">Lewat</span>
-                                </div>
+                                @if(!empty($slot['booking_code']))
+                                    <button type="button" 
+                                            class="slot-box slot-past border-0 d-flex flex-column align-items-center justify-content-center" 
+                                            data-bs-toggle="tooltip" 
+                                            data-bs-html="true" 
+                                            title="<strong>{{ e($slot['customer_name']) }}</strong> (SELESAI / LEWAT)<br>Kode: {{ $slot['booking_code'] }}<br>Jam: {{ $slot['start'] }} - {{ $slot['end'] }} WIB<br><em>Klik untuk rincian</em>"
+                                            onclick="showSlotDetail('{{ $slot['booking_code'] }}', '{{ addslashes($slot['customer_name']) }}', '{{ $slot['customer_phone'] }}', '{{ addslashes($field->name) }}', '{{ $scheduleDateIndo }}', '{{ $slot['start'] }} - {{ $slot['end'] }} WIB', 'Selesai (Jam Lewat)', '{{ number_format($slot['total_price'], 0, ',', '.') }}', '{{ $slot['res_id'] }}', 'past', '{{ addslashes($slot['notes'] ?? '') }}')">
+                                        <span class="slot-time text-muted">{{ $slot['start'] }}</span>
+                                        <span class="slot-sub text-muted" style="font-size: 0.65rem;">Lewat</span>
+                                    </button>
+                                @else
+                                    <div class="slot-box slot-past d-flex flex-column align-items-center justify-content-center" 
+                                         data-bs-toggle="tooltip" 
+                                         data-bs-placement="top" 
+                                         title="Jam telah lewat ({{ $slot['start'] }} - {{ $slot['end'] }} WIB)">
+                                        <span class="slot-time text-muted">{{ $slot['start'] }}</span>
+                                        <span class="slot-sub text-muted" style="font-size: 0.65rem;">Lewat</span>
+                                    </div>
+                                @endif
                             @endif
                         @endforeach
                     </div>
@@ -934,6 +946,10 @@ function showSlotDetail(code, customer, phone, field, dateStr, timeStr, status, 
         badge.className = 'badge bg-success-subtle text-success border border-success-subtle py-1.5 px-2.5 fw-semibold';
         badge.style.backgroundColor = '';
         badge.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Lunas / Terkonfirmasi';
+    } else if (resStatus === 'past') {
+        badge.className = 'badge bg-secondary-subtle text-secondary border border-secondary-subtle py-1.5 px-2.5 fw-semibold';
+        badge.style.backgroundColor = '';
+        badge.innerHTML = '<i class="bi bi-dash-circle me-1"></i> Selesai (Jam Lewat)';
     } else {
         badge.className = 'badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1.5 px-2.5 fw-semibold';
         badge.style.backgroundColor = '';

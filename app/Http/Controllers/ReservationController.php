@@ -103,37 +103,70 @@ class ReservationController extends Controller
             $isPastDate = ($dateString < $todayWibStr);
             $currentTimeStr = $nowWib->format('H:i');
 
-            // Retrieve all active approved reservations for this field and date
-            // HANYA menganggap slot jam terisi (status: booked) apabila reservasi sudah disetujui / lunas oleh admin
+            // Retrieve all active approved / pending reservations for this field and date
             $activeReservations = collect();
             if ($field) {
                 $activeReservations = Reservation::where('field_id', $field->id)
                     ->whereDate('reservation_date', $dateString)
-                    ->whereIn('status', ['paid', 'lunas', 'confirmed', 'dp'])
+                    ->whereIn('status', ['paid', 'lunas', 'confirmed', 'dp', 'pending'])
                     ->get(['id', 'start_time', 'end_time', 'status']);
             }
 
             for ($hour = $startHour; $hour < $endHour; $hour++) {
                 $slotStartStr = sprintf('%02d:00', $hour);
                 $slotEndStr = sprintf('%02d:00', $hour + 1);
+                $slotStart = Carbon::parse($dateString . ' ' . $slotStartStr, 'Asia/Jakarta');
+                $slotEnd = Carbon::parse($dateString . ' ' . $slotEndStr, 'Asia/Jakarta');
 
-                $status = 'available';
-
-                $isBooked = $activeReservations->contains(function ($res) use ($slotStartStr, $slotEndStr) {
-                    $resStart = Carbon::parse($res->start_time)->format('H:i');
-                    $resEnd = Carbon::parse($res->end_time)->format('H:i');
-                    return $resStart < $slotEndStr && $resEnd > $slotStartStr;
+                $confirmedRes = $activeReservations->first(function ($r) use ($slotStartStr, $slotEndStr) {
+                    $rStart = Carbon::parse($r->start_time)->format('H:i');
+                    $rEnd = Carbon::parse($r->end_time)->format('H:i');
+                    $isConfirmed = in_array(strtolower($r->status), ['paid', 'lunas', 'confirmed', 'dp']);
+                    return $isConfirmed && $rStart < $slotEndStr && $rEnd > $slotStartStr;
                 });
+
+                $pendingRes = null;
+                if (! $confirmedRes) {
+                    $pendingRes = $activeReservations->first(function ($r) use ($slotStartStr, $slotEndStr) {
+                        $rStart = Carbon::parse($r->start_time)->format('H:i');
+                        $rEnd = Carbon::parse($r->end_time)->format('H:i');
+                        return strtolower($r->status) === 'pending' && $rStart < $slotEndStr && $rEnd > $slotStartStr;
+                    });
+                }
+
+                $hasActiveRes = ($confirmedRes || $pendingRes);
+
+                // PRIORITAS 1: Abu-abu (Lewat)
+                // Jika tanggal sebelum hari ini, ATAU jika hari ini dan waktu slot sudah lewat:
+                // - Jika slot kosong: sudah lewat begitu $nowWib->gte($slotStart) (misal pukul 18:19 WIB, maka 18:00 ke bawah sudah lewat)
+                // - Jika slot terisi (Lunas / Pending): sudah lewat begitu melewati jam selesai bermain $nowWib->gte($slotEnd) (misal booking pukul 08:00 - 15:00, maka setelah pukul 15:00 WIB otomatis berubah menjadi Abu-abu / Lewat)
+                $isPastSlot = false;
+                if ($isPastDate) {
+                    $isPastSlot = true;
+                } elseif ($isToday) {
+                    if ($hasActiveRes) {
+                        $isPastSlot = $nowWib->gte($slotEnd);
+                    } else {
+                        $isPastSlot = $nowWib->gte($slotStart);
+                    }
+                }
 
                 if ($field && $field->status !== 'available') {
                     $status = 'maintenance';
-                } elseif ($isBooked) {
-                    // Slot terisi karena sudah disetujui / lunas oleh admin
-                    $status = 'booked';
-                } elseif ($isPastDate || ($isToday && $slotStartStr < $currentTimeStr)) {
-                    // Jika hari ini dan jam mulai sudah lewat dari waktu sekarang (WIB) -> Lewat
+                } elseif ($isPastSlot) {
+                    // 1. Abu-abu: Lewat
                     $status = 'past';
+                } elseif ($isToday && $nowWib->gte($slotStart) && $nowWib->lt($slotEnd) && $confirmedRes) {
+                    // 2. Biru: Sedang Dimainkan
+                    $status = 'in_play';
+                } elseif ($confirmedRes) {
+                    // 3. Merah: Terisi / Lunas
+                    $status = 'booked';
+                } elseif ($pendingRes) {
+                    // 4. Oranye: Menunggu Bayar WA
+                    $status = 'pending';
                 } else {
+                    // 5. Hijau: Tersedia
                     $status = 'available';
                 }
 

@@ -147,7 +147,7 @@ class AdminController extends Controller
         // 2. Semua reservasi pada tanggal yang dipilih ($scheduleDate) dengan format jam string bersih (H:i)
         $selectedDateReservations = Reservation::with(['user', 'field'])
             ->whereDate('reservation_date', $scheduleDate)
-            ->whereIn('status', ['pending', 'confirmed'])
+            ->whereIn('status', ['pending', 'confirmed', 'paid', 'lunas', 'dp'])
             ->get()
             ->map(function ($r) {
                 $r->start_str = is_object($r->start_time) ? $r->start_time->format('H:i') : substr($r->start_time, 0, 5);
@@ -225,94 +225,109 @@ class AdminController extends Controller
             // Slot array for this field
             $fieldSlots = [];
             foreach ($timeSlots as $slot) {
-                // PRIORITAS 1: Cek apakah slot jam ini masuk dalam reservasi berstatus Lunas / Terkonfirmasi
+                // Cek apakah slot jam ini masuk dalam reservasi berstatus Lunas / Terkonfirmasi
                 $confirmedRes = $selectedDateReservations->first(function ($r) use ($field, $slot) {
                     return $r->field_id == $field->id
-                        && $r->status === 'confirmed'
+                        && in_array(strtolower($r->status), ['confirmed', 'paid', 'lunas', 'dp'])
                         && $r->start_str < $slot['end']
                         && $r->end_str > $slot['start'];
                 });
 
-                // PRIORITAS 2: Cek apakah slot jam masuk dalam reservasi berstatus Menunggu Pembayaran
+                // Cek apakah slot jam masuk dalam reservasi berstatus Menunggu Pembayaran
                 $pendingRes = null;
                 if (! $confirmedRes) {
                     $pendingRes = $selectedDateReservations->first(function ($r) use ($field, $slot) {
                         return $r->field_id == $field->id
-                            && $r->status === 'pending'
+                            && strtolower($r->status) === 'pending'
                             && $r->start_str < $slot['end']
                             && $r->end_str > $slot['start'];
                     });
                 }
 
-                $isCurrentSlot = $isScheduleToday && (substr($currentTime, 0, 5) >= $slot['start'] && substr($currentTime, 0, 5) < $slot['end']);
-                $isPastSlot = $isScheduleToday && ($slot['end'] <= substr($currentTime, 0, 5));
+                $slotStart = Carbon::parse($scheduleDate . ' ' . $slot['start'], 'Asia/Jakarta');
+                $slotEnd = Carbon::parse($scheduleDate . ' ' . $slot['end'], 'Asia/Jakarta');
+                $hasActiveRes = ($confirmedRes || $pendingRes);
 
-                if ($confirmedRes) {
-                    $cName = $resolveCustomerName($confirmedRes);
-                    $cPhone = $confirmedRes->customer_phone ?: ($confirmedRes->user?->phone ?? '-');
-                    
-                    if ($isCurrentSlot) {
-                        // PRIORITAS 1: Biru (Sedang Dimainkan) - Tanggal hari ini + jam sekarang berada di dalam slot + Lunas
-                        $fieldSlots[] = [
-                            'start' => $slot['start'],
-                            'end' => $slot['end'],
-                            'status' => 'in_play',
-                            'res_status' => 'confirmed',
-                            'res_id' => $confirmedRes->id,
-                            'booking_code' => $confirmedRes->code,
-                            'customer_name' => $cName,
-                            'customer_phone' => $cPhone,
-                            'total_price' => $confirmedRes->total_price,
-                            'notes' => $confirmedRes->notes,
-                        ];
+                // PRIORITAS 1: Abu-abu (Lewat)
+                // Jika tanggal sebelum hari ini, ATAU jika hari ini dan waktu slot sudah lewat:
+                // - Jika slot kosong: sudah lewat begitu $currentNow->gte($slotStart) (misal pukul 18:19 WIB, maka 18:00 ke bawah sudah lewat)
+                // - Jika slot terisi (Lunas / Pending): sudah lewat begitu melewati jam selesai bermain $currentNow->gte($slotEnd) (misal booking pukul 08:00 - 15:00, maka setelah pukul 15:00 WIB otomatis berubah menjadi Abu-abu / Lewat)
+                $isPastSlot = false;
+                if ($parsedScheduleDate->lt(Carbon::today('Asia/Jakarta'))) {
+                    $isPastSlot = true;
+                } elseif ($isScheduleToday) {
+                    if ($hasActiveRes) {
+                        $isPastSlot = $currentNow->gte($slotEnd);
                     } else {
-                        // PRIORITAS 2: Merah (Terisi / Lunas)
-                        $fieldSlots[] = [
-                            'start' => $slot['start'],
-                            'end' => $slot['end'],
-                            'status' => 'booked',
-                            'res_status' => 'confirmed',
-                            'res_id' => $confirmedRes->id,
-                            'booking_code' => $confirmedRes->code,
-                            'customer_name' => $cName,
-                            'customer_phone' => $cPhone,
-                            'total_price' => $confirmedRes->total_price,
-                            'notes' => $confirmedRes->notes,
-                        ];
+                        $isPastSlot = $currentNow->gte($slotStart);
                     }
-                } elseif ($pendingRes) {
-                    $cName = $resolveCustomerName($pendingRes);
-                    $cPhone = $pendingRes->customer_phone ?: ($pendingRes->user?->phone ?? '-');
-                    if ($isPastSlot) {
-                        $fieldSlots[] = [
-                            'start' => $slot['start'],
-                            'end' => $slot['end'],
-                            'status' => 'past',
-                        ];
-                    } else {
-                        // PRIORITAS 3: Oranye (Menunggu Bayar WA)
-                        $fieldSlots[] = [
-                            'start' => $slot['start'],
-                            'end' => $slot['end'],
-                            'status' => 'booked',
-                            'res_status' => 'pending',
-                            'res_id' => $pendingRes->id,
-                            'booking_code' => $pendingRes->code,
-                            'customer_name' => $cName,
-                            'customer_phone' => $cPhone,
-                            'total_price' => $pendingRes->total_price,
-                            'notes' => $pendingRes->notes,
-                        ];
-                    }
-                } elseif ($isPastSlot) {
-                    // PRIORITAS 4: Abu-abu (Jam Lewat)
+                }
+
+                if ($isPastSlot) {
+                    // PRIORITAS 1: Abu-abu (Lewat)
+                    $activeRes = $confirmedRes ?: $pendingRes;
                     $fieldSlots[] = [
                         'start' => $slot['start'],
                         'end' => $slot['end'],
                         'status' => 'past',
+                        'res_status' => $activeRes ? $activeRes->status : null,
+                        'res_id' => $activeRes ? $activeRes->id : null,
+                        'booking_code' => $activeRes ? $activeRes->code : null,
+                        'customer_name' => $activeRes ? $resolveCustomerName($activeRes) : null,
+                        'customer_phone' => $activeRes ? ($activeRes->customer_phone ?: ($activeRes->user?->phone ?? '-')) : null,
+                        'total_price' => $activeRes ? $activeRes->total_price : null,
+                        'notes' => $activeRes ? $activeRes->notes : null,
+                    ];
+                } elseif ($isScheduleToday && $currentNow->gte($slotStart) && $currentNow->lt($slotEnd) && $confirmedRes) {
+                    // PRIORITAS 2: Biru (Sedang Dimainkan) - Hari ini, $now berada di antara $slotStart dan $slotEnd, dan status reservasi Lunas
+                    $cName = $resolveCustomerName($confirmedRes);
+                    $cPhone = $confirmedRes->customer_phone ?: ($confirmedRes->user?->phone ?? '-');
+                    $fieldSlots[] = [
+                        'start' => $slot['start'],
+                        'end' => $slot['end'],
+                        'status' => 'in_play',
+                        'res_status' => 'confirmed',
+                        'res_id' => $confirmedRes->id,
+                        'booking_code' => $confirmedRes->code,
+                        'customer_name' => $cName,
+                        'customer_phone' => $cPhone,
+                        'total_price' => $confirmedRes->total_price,
+                        'notes' => $confirmedRes->notes,
+                    ];
+                } elseif ($confirmedRes) {
+                    // PRIORITAS 3: Merah (Terisi / Lunas) - Jam belum lewat dan status reservasi Lunas
+                    $cName = $resolveCustomerName($confirmedRes);
+                    $cPhone = $confirmedRes->customer_phone ?: ($confirmedRes->user?->phone ?? '-');
+                    $fieldSlots[] = [
+                        'start' => $slot['start'],
+                        'end' => $slot['end'],
+                        'status' => 'booked',
+                        'res_status' => 'confirmed',
+                        'res_id' => $confirmedRes->id,
+                        'booking_code' => $confirmedRes->code,
+                        'customer_name' => $cName,
+                        'customer_phone' => $cPhone,
+                        'total_price' => $confirmedRes->total_price,
+                        'notes' => $confirmedRes->notes,
+                    ];
+                } elseif ($pendingRes) {
+                    // PRIORITAS 4: Oranye (Menunggu Bayar WA) - Jam belum lewat dan status reservasi masih Pending
+                    $cName = $resolveCustomerName($pendingRes);
+                    $cPhone = $pendingRes->customer_phone ?: ($pendingRes->user?->phone ?? '-');
+                    $fieldSlots[] = [
+                        'start' => $slot['start'],
+                        'end' => $slot['end'],
+                        'status' => 'booked',
+                        'res_status' => 'pending',
+                        'res_id' => $pendingRes->id,
+                        'booking_code' => $pendingRes->code,
+                        'customer_name' => $cName,
+                        'customer_phone' => $cPhone,
+                        'total_price' => $pendingRes->total_price,
+                        'notes' => $pendingRes->notes,
                     ];
                 } else {
-                    // PRIORITAS 5: Hijau (Tersedia)
+                    // PRIORITAS 5: Hijau (Tersedia) - Kosong dan jam mulai belum lewat
                     $fieldSlots[] = [
                         'start' => $slot['start'],
                         'end' => $slot['end'],

@@ -21,7 +21,36 @@ use Illuminate\Support\Facades\Route;
 
 // Public: Halaman Utama (Langsung Kartu Lapangan & Booking)
 Route::get('/', function () {
-    $fields = Field::orderBy('id', 'asc')->get();
+    $nowWib = \Carbon\Carbon::now('Asia/Jakarta');
+    $todayStr = $nowWib->toDateString();
+    $currentHour = (int) $nowWib->format('H');
+
+    $fields = Field::with(['reservations' => function ($q) use ($todayStr) {
+        $q->whereDate('reservation_date', $todayStr)
+          ->whereIn('status', ['confirmed', 'paid', 'pending']);
+    }])->orderBy('id', 'asc')->get();
+
+    foreach ($fields as $field) {
+        $bookedHours = [];
+        foreach ($field->reservations as $res) {
+            $startH = (int) \Carbon\Carbon::parse($res->start_time)->format('H');
+            $endH = (int) \Carbon\Carbon::parse($res->end_time)->format('H');
+            for ($h = $startH; $h < $endH; $h++) {
+                $bookedHours[$h] = true;
+            }
+        }
+
+        $availableCount = 0;
+        // Jam operasional: 08:00 - 23:00 (15 jam slot)
+        $startSlot = max(8, $currentHour);
+        for ($h = $startSlot; $h < 23; $h++) {
+            if (! isset($bookedHours[$h])) {
+                $availableCount++;
+            }
+        }
+        $field->today_available_slots = $availableCount;
+    }
+
     return view('welcome', compact('fields'));
 })->name('home');
 
